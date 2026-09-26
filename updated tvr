@@ -205,6 +205,19 @@ ShopTab:Button({ Text = "Freya", Callback = function() buyTalisman("BlueTalis") 
 ShopTab:Button({ Text = "Sun", Callback = function() buyTalisman("SunTalis") end })
 ShopTab:Button({ Text = "Emily", Callback = function() buyTalisman("ElderTalis") end })
 
+ShopTab:Divider()
+ShopTab:BoldLabel({ Text = "Grimoire" })
+
+local function buyGrimoire(name)
+	local Event = game:GetService("ReplicatedStorage").Events.Shops
+	Event:FireServer("Grimoire", name, 0)
+end
+
+ShopTab:Button({ Text = "Burn Book", Callback = function() buyGrimoire("Sun") end })
+ShopTab:Button({ Text = "Death Note", Callback = function() buyGrimoire("Mystical") end })
+ShopTab:Button({ Text = "Valentine", Callback = function() buyGrimoire("Valentine") end })
+ShopTab:Button({ Text = "The Book of Shadows", Callback = function() buyGrimoire("Bos") end })
+
 -- ============================================================
 -- MONEY TAB
 -- ============================================================
@@ -606,6 +619,58 @@ InterfaceTab:Label({
 
 InterfaceTab:Label({
 	Text = "Press the minimize button to close / hide the UI.",
+})
+
+InterfaceTab:Divider()
+InterfaceTab:BoldLabel({ Text = "Danger" })
+
+InterfaceTab:Button({
+	Text = "EJECT",
+	Description = "Completely unloads the script.",
+	Icon = "power",
+	Callback = function()
+		-- Stop fly
+		if flyConnection then flyConnection:Disconnect() end
+		if flyBodyVelocity then flyBodyVelocity:Destroy() end
+		if flyBodyGyro then flyBodyGyro:Destroy() end
+
+		local char = LocalPlayer.Character
+		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.PlatformStand = false
+			humanoid.WalkSpeed = 16
+		end
+
+		-- Stop speed
+		if speedConnection then speedConnection:Disconnect() end
+
+		-- Stop noclip
+		if noclipConnection then noclipConnection:Disconnect() end
+		if char then
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = true
+				end
+			end
+		end
+
+		-- Disable ESP
+		pcall(function()
+			ESP:Toggle(false)
+		end)
+
+		-- Destroy the menu
+		pcall(function()
+			Menu:Destroy()
+		end)
+
+		-- Clear the global reference
+		if getgenv then
+			getgenv().__ArmentaLibExample = nil
+		end
+
+		print("[TVR Script] Ejected.")
+	end,
 })
 
 -- ============================================================
