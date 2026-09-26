@@ -191,6 +191,20 @@ ShopTab:Button({ Text = "Shotgun", Callback = function() buyWeapon("Shotgun") en
 ShopTab:Button({ Text = "Vervain Grenade", Callback = function() buyWeapon("Vervain Grenade") end })
 ShopTab:Button({ Text = "Wolfsbane Grenade", Callback = function() buyWeapon("Wolfsbane Grenade") end })
 
+ShopTab:Divider()
+ShopTab:BoldLabel({ Text = "Talisman" })
+
+local function buyTalisman(name)
+	local Event = game:GetService("ReplicatedStorage").Events.Shops
+	Event:FireServer("Talisman", name, 0)
+end
+
+ShopTab:Button({ Text = "Dark", Callback = function() buyTalisman("Dark") end })
+ShopTab:Button({ Text = "Moon", Callback = function() buyTalisman("MoonTalis") end })
+ShopTab:Button({ Text = "Freya", Callback = function() buyTalisman("BlueTalis") end })
+ShopTab:Button({ Text = "Sun", Callback = function() buyTalisman("SunTalis") end })
+ShopTab:Button({ Text = "Emily", Callback = function() buyTalisman("ElderTalis") end })
+
 -- ============================================================
 -- MONEY TAB
 -- ============================================================
