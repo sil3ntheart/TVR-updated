@@ -39,6 +39,7 @@ end
 local SpinsTab = Menu:Tab({ Text = "Spins" })
 local ShopTab = Menu:Tab({ Text = "Shop" })
 local MoneyTab = Menu:Tab({ Text = "Money" })
+local AssistenceTab = Menu:Tab({ Text = "Assistence" })
 local VisualsTab = Menu:Tab({ Text = "Visuals" })
 local WorldTab = Menu:Tab({ Text = "World" })
 local InterfaceTab = Menu:Tab({ Text = "Interface" })
@@ -229,6 +230,36 @@ MoneyTab:Button({
 	Icon = "dollar-sign",
 	Callback = function()
 		game:GetService("ReplicatedStorage").Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+	end,
+})
+
+-- ============================================================
+-- ASSISTENCE TAB
+-- ============================================================
+AssistenceTab:BoldLabel({ Text = "Candle Channel" })
+
+AssistenceTab:Button({
+	Text = "Candle Channel",
+	Description = "Fires the Fire event, waits 2 seconds, then fires Channeling.",
+	Icon = "flame",
+	Callback = function()
+		local FireEvent = game:GetService("ReplicatedStorage").Events.Fire
+		FireEvent:FireServer(
+			Vector3.new(-863, -9.4116239547729492, 558.57769775390625),
+			workspace.ChannelObjects:GetChildren()[50],
+			"Start"
+		)
+
+		Menu:Notify({ Title = "Assistence", Content = "Fire event fired. Waiting 2 seconds...", Type = "Info", Duration = 2 })
+
+		task.wait(2)
+
+		local ChannelingEvent = game:GetService("ReplicatedStorage").Events.Channeling
+		ChannelingEvent:FireServer(
+			workspace.Map.BuyableHouses.House1.Folder.mesh["s4studio_mesh_3.036"]
+		)
+
+		Menu:Notify({ Title = "Assistence", Content = "Candle Channel complete.", Type = "Success", Duration = 3 })
 	end,
 })
 
@@ -629,7 +660,6 @@ InterfaceTab:Button({
 	Description = "Completely unloads the script.",
 	Icon = "power",
 	Callback = function()
-		-- Stop fly
 		if flyConnection then flyConnection:Disconnect() end
 		if flyBodyVelocity then flyBodyVelocity:Destroy() end
 		if flyBodyGyro then flyBodyGyro:Destroy() end
@@ -641,10 +671,7 @@ InterfaceTab:Button({
 			humanoid.WalkSpeed = 16
 		end
 
-		-- Stop speed
 		if speedConnection then speedConnection:Disconnect() end
-
-		-- Stop noclip
 		if noclipConnection then noclipConnection:Disconnect() end
 		if char then
 			for _, part in ipairs(char:GetDescendants()) do
@@ -654,17 +681,14 @@ InterfaceTab:Button({
 			end
 		end
 
-		-- Disable ESP
 		pcall(function()
 			ESP:Toggle(false)
 		end)
 
-		-- Destroy the menu
 		pcall(function()
 			Menu:Destroy()
 		end)
 
-		-- Clear the global reference
 		if getgenv then
 			getgenv().__ArmentaLibExample = nil
 		end
