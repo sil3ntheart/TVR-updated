@@ -1,0 +1,622 @@
+if getgenv then
+	if getgenv().__ArmentaLibExample then
+		pcall(function()
+			getgenv().__ArmentaLibExample:Destroy()
+		end)
+	end
+end
+
+local LIB_URL = "https://raw.githubusercontent.com/Xyraniz/VaultUI/refs/heads/main/Libraries/Armenta-Lib/source.lua"
+
+local FyyUI = loadstring(game:HttpGet(LIB_URL))()
+
+local Menu = FyyUI.Menu({
+	Title = "TVR Script",
+	Theme = "Violet",
+	Size = UDim2.fromOffset(700, 470),
+	MinSize = Vector2.new(440, 340),
+	MaxSize = Vector2.new(920, 640),
+	Resizable = true,
+	Shadow = true,
+	HasOutline = true,
+	Responsive = true,
+	Scale = 1,
+	Stats = {
+		Enabled = true,
+		TabName = "Overview",
+		TabIcon = "layout-dashboard",
+		ShowProfile = true,
+		ShowGame = true,
+		ShowServer = true,
+		ShowSupport = false,
+	},
+})
+
+if getgenv then
+	getgenv().__ArmentaLibExample = Menu
+end
+
+local SpinsTab = Menu:Tab({ Text = "Spins" })
+local ShopTab = Menu:Tab({ Text = "Shop" })
+local MoneyTab = Menu:Tab({ Text = "Money" })
+local VisualsTab = Menu:Tab({ Text = "Visuals" })
+local WorldTab = Menu:Tab({ Text = "World" })
+local InterfaceTab = Menu:Tab({ Text = "Interface" })
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- ============================================================
+-- SPINS TAB
+-- ============================================================
+SpinsTab:BoldLabel({ Text = "Species" })
+
+SpinsTab:Button({ Text = "Spawn Witch", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Species", "Witch")
+	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Spawn Siphoner", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Species", "Siphoner")
+	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Spawn Vampire", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Species", "Vampire")
+	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Spawn Werewolf", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Species", "Werewolf")
+	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Spawn Human", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Species", "Human")
+	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Divider()
+SpinsTab:BoldLabel({ Text = "Witch Traits" })
+
+SpinsTab:Button({ Text = "First Born", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "First Born")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Gemini", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Gemini")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Dark Magic", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Dark Magic")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Nature", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Nature")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Psychic", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Psychic")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Divider()
+SpinsTab:BoldLabel({ Text = "Vampire Traits" })
+
+SpinsTab:Button({ Text = "Ripper", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Ripper")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Augustine", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Augustine")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Vervain Immune", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Vervain Immunue")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Divider()
+SpinsTab:BoldLabel({ Text = "Werewolf Traits" })
+
+SpinsTab:Button({ Text = "Venomous", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Venomous")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Moon Blessed", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Moon Blessed")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Divider()
+SpinsTab:BoldLabel({ Text = "Human Traits" })
+
+SpinsTab:Button({ Text = "Hunter", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Doppelganger")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Doppelganger", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Doppelganger")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
+	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
+	Event:FireServer("Trait", "Vervain Taker")
+	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+end })
+
+-- ============================================================
+-- SHOP TAB
+-- ============================================================
+ShopTab:BoldLabel({ Text = "Stake Shop" })
+
+local function buyWeapon(name)
+	local Event = game:GetService("ReplicatedStorage").Events.Shops
+	Event:FireServer("Weapon", name, 0)
+end
+
+ShopTab:Button({ Text = "Wooden Stake", Callback = function() buyWeapon("Stake2") end })
+ShopTab:Button({ Text = "White Oak Stake", Callback = function() buyWeapon("White Oak Stake") end })
+ShopTab:Button({ Text = "Dagger", Callback = function() buyWeapon("Dagger") end })
+ShopTab:Button({ Text = "Pepper Spray", Callback = function() buyWeapon("Pepper Spray") end })
+ShopTab:Button({ Text = "Shotgun", Callback = function() buyWeapon("Shotgun") end })
+ShopTab:Button({ Text = "Vervain Grenade", Callback = function() buyWeapon("Vervain Grenade") end })
+ShopTab:Button({ Text = "Wolfsbane Grenade", Callback = function() buyWeapon("Wolfsbane Grenade") end })
+
+-- ============================================================
+-- MONEY TAB
+-- ============================================================
+MoneyTab:BoldLabel({ Text = "Money Methods" })
+
+MoneyTab:Button({
+	Text = "Money",
+	Description = "generate 5000000000 cash",
+	Icon = "dollar-sign",
+	Callback = function()
+		game:GetService("ReplicatedStorage").Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+	end,
+})
+
+-- ============================================================
+-- VISUALS TAB - ESP Integration
+-- ============================================================
+local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostDuckyy/ESP-Library/main/Kiriot22/source.lua"))()
+
+VisualsTab:BoldLabel({ Text = "ESP" })
+
+VisualsTab:Toggle({
+	Text = "Enable ESP",
+	Description = "Master switch for all ESP features.",
+	Default = false,
+	Callback = function(value)
+		ESP:Toggle(value)
+	end,
+})
+
+VisualsTab:Divider()
+VisualsTab:BoldLabel({ Text = "Components" })
+
+VisualsTab:Toggle({
+	Text = "Boxes",
+	Description = "Draw bounding boxes around players.",
+	Default = true,
+	Callback = function(value)
+		ESP.Boxes = value
+	end,
+})
+
+VisualsTab:Toggle({
+	Text = "Tracers",
+	Description = "Draw lines from the bottom of the screen to players.",
+	Default = false,
+	Callback = function(value)
+		ESP.Tracers = value
+	end,
+})
+
+VisualsTab:Toggle({
+	Text = "Names",
+	Description = "Show player names above the boxes.",
+	Default = false,
+	Callback = function(value)
+		ESP.Names = value
+	end,
+})
+
+VisualsTab:Divider()
+VisualsTab:BoldLabel({ Text = "Filters" })
+
+VisualsTab:Toggle({
+	Text = "Show Players",
+	Description = "Include actual players in the ESP.",
+	Default = true,
+	Callback = function(value)
+		ESP.Players = value
+	end,
+})
+
+-- ============================================================
+-- WORLD TAB - Fly, Speed, Noclip, Teleport, Infinite Yield
+-- ============================================================
+local function getPlayerList()
+	local list = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			table.insert(list, player.Name)
+		end
+	end
+	return list
+end
+
+WorldTab:BoldLabel({ Text = "Fly" })
+
+local flyEnabled = false
+local flySpeed = 50
+local flyConnection = nil
+local flyBodyVelocity = nil
+local flyBodyGyro = nil
+
+WorldTab:Toggle({
+	Text = "Enable Fly",
+	Description = "Fly around using WASD + Space/Ctrl.",
+	Default = false,
+	Callback = function(value)
+		flyEnabled = value
+
+		local char = LocalPlayer.Character
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+
+		if value then
+			if not root or not humanoid then
+				Menu:Notify({ Title = "Fly", Content = "Character not ready.", Type = "Warning" })
+				flyEnabled = false
+				return
+			end
+
+			flyBodyVelocity = Instance.new("BodyVelocity")
+			flyBodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+			flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+			flyBodyVelocity.Parent = root
+
+			flyBodyGyro = Instance.new("BodyGyro")
+			flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+			flyBodyGyro.P = 9e4
+			flyBodyGyro.CFrame = root.CFrame
+			flyBodyGyro.Parent = root
+
+			humanoid.PlatformStand = true
+
+			local camera = workspace.CurrentCamera
+
+			flyConnection = RunService.RenderStepped:Connect(function()
+				if not flyEnabled then return end
+
+				local char = LocalPlayer.Character
+				local root = char and char:FindFirstChild("HumanoidRootPart")
+				if not root then return end
+
+				local moveDir = Vector3.new(0, 0, 0)
+				if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+					moveDir = moveDir + camera.CFrame.LookVector
+				end
+				if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+					moveDir = moveDir - camera.CFrame.LookVector
+				end
+				if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+					moveDir = moveDir - camera.CFrame.RightVector
+				end
+				if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+					moveDir = moveDir + camera.CFrame.RightVector
+				end
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+					moveDir = moveDir + Vector3.new(0, 1, 0)
+				end
+				if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+					moveDir = moveDir - Vector3.new(0, 1, 0)
+				end
+
+				if moveDir.Magnitude > 0 then
+					moveDir = moveDir.Unit * flySpeed
+				end
+
+				flyBodyVelocity.Velocity = moveDir
+				flyBodyGyro.CFrame = camera.CFrame
+			end)
+
+			Menu:Notify({ Title = "Fly", Content = "Enabled.", Type = "Success" })
+		else
+			if flyConnection then
+				flyConnection:Disconnect()
+				flyConnection = nil
+			end
+			if flyBodyVelocity then
+				flyBodyVelocity:Destroy()
+				flyBodyVelocity = nil
+			end
+			if flyBodyGyro then
+				flyBodyGyro:Destroy()
+				flyBodyGyro = nil
+			end
+			if humanoid then
+				humanoid.PlatformStand = false
+			end
+			Menu:Notify({ Title = "Fly", Content = "Disabled.", Type = "Info" })
+		end
+	end,
+})
+
+WorldTab:Slider({
+	Text = "Fly Speed",
+	Description = "How fast you fly.",
+	Min = 10,
+	Max = 300,
+	Step = 5,
+	Default = 50,
+	Suffix = " studs/s",
+	Callback = function(value)
+		flySpeed = value
+	end,
+})
+
+WorldTab:Divider()
+
+WorldTab:BoldLabel({ Text = "Speed" })
+
+local speedEnabled = false
+local speedValue = 16
+local speedConnection = nil
+
+local function applySpeed()
+	local char = LocalPlayer.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = speedValue
+	end
+end
+
+WorldTab:Toggle({
+	Text = "Enable Speed",
+	Description = "Move faster than the default walkspeed.",
+	Default = false,
+	Callback = function(value)
+		speedEnabled = value
+
+		if value then
+			speedConnection = RunService.Heartbeat:Connect(function()
+				if not speedEnabled then return end
+				applySpeed()
+			end)
+			applySpeed()
+			Menu:Notify({ Title = "Speed", Content = "Enabled.", Type = "Success" })
+		else
+			if speedConnection then
+				speedConnection:Disconnect()
+				speedConnection = nil
+			end
+			local char = LocalPlayer.Character
+			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.WalkSpeed = 16
+			end
+			Menu:Notify({ Title = "Speed", Content = "Disabled.", Type = "Info" })
+		end
+	end,
+})
+
+WorldTab:Slider({
+	Text = "Speed Value",
+	Description = "Your character's walk speed.",
+	Min = 16,
+	Max = 500,
+	Step = 1,
+	Default = 16,
+	Suffix = " studs/s",
+	Callback = function(value)
+		speedValue = value
+		if speedEnabled then
+			applySpeed()
+		end
+	end,
+})
+
+WorldTab:Divider()
+
+WorldTab:BoldLabel({ Text = "Noclip" })
+
+local noclipEnabled = false
+local noclipConnection = nil
+
+WorldTab:Toggle({
+	Text = "Enable Noclip",
+	Description = "Walk through walls and objects.",
+	Default = false,
+	Callback = function(value)
+		noclipEnabled = value
+
+		if value then
+			noclipConnection = RunService.Stepped:Connect(function()
+				if not noclipEnabled then return end
+				local char = LocalPlayer.Character
+				if not char then return end
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") and part.CanCollide then
+						part.CanCollide = false
+					end
+				end
+			end)
+			Menu:Notify({ Title = "Noclip", Content = "Enabled.", Type = "Success" })
+		else
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
+			end
+			local char = LocalPlayer.Character
+			if char then
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
+			end
+			Menu:Notify({ Title = "Noclip", Content = "Disabled.", Type = "Info" })
+		end
+	end,
+})
+
+WorldTab:Divider()
+
+WorldTab:BoldLabel({ Text = "Teleport" })
+
+WorldTab:Dropdown({
+	Text = "Select Player to Teleport To",
+	Options = getPlayerList(),
+	Default = nil,
+	Callback = function(value)
+		WorldTab._teleportTarget = value
+	end,
+})
+
+WorldTab:Button({
+	Text = "Teleport to Player",
+	Description = "Moves you to the selected player's location.",
+	Icon = "map-pin",
+	Callback = function()
+		local targetName = WorldTab._teleportTarget
+		if not targetName then
+			Menu:Notify({ Title = "Teleport", Content = "No player selected.", Type = "Warning" })
+			return
+		end
+
+		local targetPlayer = Players:FindFirstChild(targetName)
+		if not targetPlayer then
+			Menu:Notify({ Title = "Teleport", Content = "Player not found.", Type = "Error" })
+			return
+		end
+
+		local targetChar = targetPlayer.Character
+		if not targetChar then
+			Menu:Notify({ Title = "Teleport", Content = "Target has no character.", Type = "Error" })
+			return
+		end
+
+		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+		if not targetRoot then
+			Menu:Notify({ Title = "Teleport", Content = "Target root not found.", Type = "Error" })
+			return
+		end
+
+		local myChar = LocalPlayer.Character
+		if not myChar then
+			Menu:Notify({ Title = "Teleport", Content = "You have no character.", Type = "Error" })
+			return
+		end
+
+		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+		if not myRoot then
+			Menu:Notify({ Title = "Teleport", Content = "Your root not found.", Type = "Error" })
+			return
+		end
+
+		myRoot.CFrame = targetRoot.CFrame
+		Menu:Notify({ Title = "Teleport", Content = "Teleported to " .. targetName, Type = "Success" })
+	end,
+})
+
+WorldTab:Divider()
+
+WorldTab:BoldLabel({ Text = "Enable Infinite Yield" })
+
+WorldTab:Button({
+	Text = "Load Infinite Yield",
+	Description = "Loads the Infinite Yield admin command script.",
+	Icon = "terminal",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+		Menu:Notify({ Title = "Infinite Yield", Content = "Loaded! Use the command bar it opens.", Type = "Success", Duration = 4 })
+	end,
+})
+
+-- ============================================================
+-- INTERFACE TAB
+-- ============================================================
+InterfaceTab:BoldLabel({ Text = "Appearance" })
+
+InterfaceTab:Dropdown({
+	Text = "Theme",
+	Description = "Switches the menu color scheme instantly.",
+	Options = {
+		"Dark", "Light", "Amoled", "Midnight", "Violet",
+		"Crimson", "Emerald", "Ocean", "Amber", "Rose",
+		"Cyber", "Slate", "Coffee",
+	},
+	Default = "Violet",
+	Callback = function(value)
+		Menu:SetTheme(value)
+	end,
+})
+
+InterfaceTab:Divider()
+
+InterfaceTab:Label({
+	Text = "Press <b>K</b> at any time to show or hide this window.",
+})
+
+InterfaceTab:Label({
+	Text = "Press the minimize button to close / hide the UI.",
+})
+
+-- ============================================================
+-- INPUT & CLEANUP
+-- ============================================================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.K then
+		Menu:ToggleVisibility()
+	end
+end)
+
+Menu:OnMinimizeChanged(function(minimized) end)
+
+Menu:OnDestroy(function()
+	if getgenv then
+		getgenv().__ArmentaLibExample = nil
+	end
+end)
+
+Menu:Notify({
+	Title = "TVR Script",
+	Content = "Loaded. Press K to hide the window.",
+	Type = "Success",
+	Duration = 4,
+})
