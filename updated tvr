@@ -206,6 +206,9 @@ ShopTab:Button({ Text = "Freya", Callback = function() buyTalisman("BlueTalis") 
 ShopTab:Button({ Text = "Sun", Callback = function() buyTalisman("SunTalis") end })
 ShopTab:Button({ Text = "Emily", Callback = function() buyTalisman("ElderTalis") end })
 
+-- Added talismans
+ShopTab:Button({ Text = "Green", Callback = function() buyTalisman("GreenTalis") end })
+ShopTab:Button({ Text = "Qetsiyah", Callback = function() buyTalisman("AncientTalis") end })
 ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Grimoire" })
 
