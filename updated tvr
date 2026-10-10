@@ -47,6 +47,7 @@ local InterfaceTab = Menu:Tab({ Text = "Interface" })
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
@@ -271,11 +272,12 @@ AssistenceTab:Button({
 -- ============================================================
 local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostDuckyy/ESP-Library/main/Kiriot22/source.lua"))()
 
-VisualsTab:BoldLabel({ Text = "ESP" })
+-- ---- Master Switch ----
+VisualsTab:BoldLabel({ Text = "Master" })
 
 VisualsTab:Toggle({
 	Text = "Enable ESP",
-	Description = "Master switch for all ESP features.",
+	Description = "Master switch for every ESP feature below.",
 	Default = false,
 	Callback = function(value)
 		ESP:Toggle(value)
@@ -283,6 +285,164 @@ VisualsTab:Toggle({
 })
 
 VisualsTab:Divider()
+
+-- ---- Plants (Healing Herb / Vervain / Wolfsbane) ----
+VisualsTab:BoldLabel({ Text = "Plants" })
+
+local PLANT_CONFIG = {
+	["Healing Herb"] = { Color = Color3.fromRGB(0, 255, 120),   Label = "Healing Herb", Enabled = false },
+	["Vervain"]      = { Color = Color3.fromRGB(255, 80, 200),  Label = "Vervain",      Enabled = false },
+	["Wolfsbane"]    = { Color = Color3.fromRGB(180, 120, 255), Label = "Wolfsbane",    Enabled = false },
+}
+
+-- Our own drawing storage: [plantInstance] = { label = Drawing }
+local PlantDrawings = {}
+local plantRenderConn = nil
+
+local function getPlantConfig(obj)
+	if not obj or not obj:IsA("BasePart") then return nil end
+	return PLANT_CONFIG[obj.Name]
+end
+
+local function createPlantDrawing(obj, cfg)
+	if PlantDrawings[obj] then return end
+
+	local drawings = {}
+
+	drawings.label = Drawing.new("Text")
+	drawings.label.Size = 16
+	drawings.label.Center = true
+	drawings.label.Outline = true
+	drawings.label.Color = cfg.Color
+	drawings.label.Transparency = 1
+	drawings.label.Visible = false
+
+	PlantDrawings[obj] = drawings
+end
+
+local function destroyPlantDrawing(obj)
+	local d = PlantDrawings[obj]
+	if not d then return end
+	for _, drawing in pairs(d) do
+		pcall(function() drawing:Remove() end)
+	end
+	PlantDrawings[obj] = nil
+end
+
+local function destroyAllPlantDrawings()
+	for obj, _ in pairs(PlantDrawings) do
+		destroyPlantDrawing(obj)
+	end
+end
+
+local function refreshPlantSet()
+	for _, obj in ipairs(workspace.Map.Plants:GetChildren()) do
+		local cfg = getPlantConfig(obj)
+		if cfg and cfg.Enabled then
+			createPlantDrawing(obj, cfg)
+		else
+			destroyPlantDrawing(obj)
+		end
+	end
+end
+
+local function startPlantRenderer()
+	if plantRenderConn then return end
+	plantRenderConn = RunService.RenderStepped:Connect(function()
+		local camera = workspace.CurrentCamera
+		if not camera then return end
+
+		for obj, drawings in pairs(PlantDrawings) do
+			local cfg = getPlantConfig(obj)
+			if not cfg or not cfg.Enabled or not obj.Parent then
+				destroyPlantDrawing(obj)
+				continue
+			end
+
+			local pos, onScreen = camera:WorldToViewportPoint(obj.Position)
+			if not onScreen then
+				drawings.label.Visible = false
+				continue
+			end
+
+			local distance = (camera.CFrame.Position - obj.Position).Magnitude
+			drawings.label.Text = string.format("%s (%d away)", cfg.Label, math.floor(distance + 0.5))
+			drawings.label.Position = Vector2.new(pos.X, pos.Y)
+			drawings.label.Visible = true
+		end
+	end)
+end
+
+local function stopPlantRenderer()
+	if plantRenderConn then
+		plantRenderConn:Disconnect()
+		plantRenderConn = nil
+	end
+end
+
+-- Pick up newly-spawned plants
+workspace.Map.Plants.ChildAdded:Connect(function(obj)
+	task.wait(0.1)
+	local cfg = getPlantConfig(obj)
+	if cfg and cfg.Enabled then
+		createPlantDrawing(obj, cfg)
+	end
+end)
+
+startPlantRenderer()
+refreshPlantSet()
+
+VisualsTab:Toggle({
+	Text = "Healing Herb",
+	Description = "Highlight Healing Herbs only.",
+	Default = false,
+	Callback = function(value)
+		PLANT_CONFIG["Healing Herb"].Enabled = value
+		refreshPlantSet()
+		Menu:Notify({
+			Title = "ESP",
+			Content = "Healing Herb ESP " .. (value and "enabled." or "disabled."),
+			Type = value and "Success" or "Info",
+			Duration = 2,
+		})
+	end,
+})
+
+VisualsTab:Toggle({
+	Text = "Vervain",
+	Description = "Highlight Vervain plants only.",
+	Default = false,
+	Callback = function(value)
+		PLANT_CONFIG["Vervain"].Enabled = value
+		refreshPlantSet()
+		Menu:Notify({
+			Title = "ESP",
+			Content = "Vervain ESP " .. (value and "enabled." or "disabled."),
+			Type = value and "Success" or "Info",
+			Duration = 2,
+		})
+	end,
+})
+
+VisualsTab:Toggle({
+	Text = "Wolfsbane",
+	Description = "Highlight Wolfsbane plants only.",
+	Default = false,
+	Callback = function(value)
+		PLANT_CONFIG["Wolfsbane"].Enabled = value
+		refreshPlantSet()
+		Menu:Notify({
+			Title = "ESP",
+			Content = "Wolfsbane ESP " .. (value and "enabled." or "disabled."),
+			Type = value and "Success" or "Info",
+			Duration = 2,
+		})
+	end,
+})
+
+VisualsTab:Divider()
+
+-- ---- Components ----
 VisualsTab:BoldLabel({ Text = "Components" })
 
 VisualsTab:Toggle({
@@ -313,6 +473,8 @@ VisualsTab:Toggle({
 })
 
 VisualsTab:Divider()
+
+-- ---- Filters ----
 VisualsTab:BoldLabel({ Text = "Filters" })
 
 VisualsTab:Toggle({
@@ -656,6 +818,31 @@ InterfaceTab:Label({
 })
 
 InterfaceTab:Divider()
+InterfaceTab:BoldLabel({ Text = "Server" })
+
+InterfaceTab:Button({
+	Text = "Rejoin Same Server",
+	Description = "Reconnects you to this exact server (same JobId).",
+	Icon = "refresh-cw",
+	Callback = function()
+		Menu:Notify({ Title = "Rejoin", Content = "Rejoining same server...", Type = "Info", Duration = 2 })
+		task.wait(0.5)
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+	end,
+})
+
+InterfaceTab:Button({
+	Text = "Rejoin New Server",
+	Description = "Sends you to a random new server of the same game.",
+	Icon = "shuffle",
+	Callback = function()
+		Menu:Notify({ Title = "Rejoin", Content = "Joining a new server...", Type = "Info", Duration = 2 })
+		task.wait(0.5)
+		TeleportService:Teleport(game.PlaceId, LocalPlayer)
+	end,
+})
+
+InterfaceTab:Divider()
 InterfaceTab:BoldLabel({ Text = "Danger" })
 
 InterfaceTab:Button({
@@ -686,6 +873,11 @@ InterfaceTab:Button({
 
 		pcall(function()
 			ESP:Toggle(false)
+		end)
+
+		pcall(function()
+			destroyAllPlantDrawings()
+			stopPlantRenderer()
 		end)
 
 		pcall(function()
