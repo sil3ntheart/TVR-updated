@@ -48,143 +48,131 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
--- ============================================================
--- SPINS TAB
--- ============================================================
+local talismanAutoEnabled = false
+local talismanThread = nil
+
+local function stopTalismanLoop()
+	talismanAutoEnabled = false
+	if talismanThread then
+		pcall(function() task.cancel(talismanThread) end)
+		talismanThread = nil
+	end
+end
+
+-- SPINS
+SpinsTab:BoldLabel({ Text = "Add Spins" })
+SpinsTab:Button({
+	Text = "Add Spins",
+	Description = "Adds spins via the CharacterCreation event.",
+	Icon = "dice",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local CharacterCreation = Events and Events:FindFirstChild("CharacterCreation")
+		if not CharacterCreation then
+			Menu:Notify({ Title = "Add Spins", Content = "CharacterCreation event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		CharacterCreation:FireServer("Spins", -1000000)
+		Menu:Notify({ Title = "Add Spins", Content = "Spins event fired.", Type = "Success", Duration = 3 })
+	end,
+})
+
+SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Species" })
 
 SpinsTab:Button({ Text = "Spawn Witch", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Species", "Witch")
-	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Witch")
+	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Spawn Siphoner", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Species", "Siphoner")
-	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Siphoner")
+	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Spawn Vampire", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Species", "Vampire")
-	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Vampire")
+	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Spawn Werewolf", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Species", "Werewolf")
-	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Werewolf")
+	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Spawn Human", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Species", "Human")
-	Menu:Notify({ Title = "Species", Content = "Please reset and spawn in to play as your selected species!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Human")
+	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Witch Traits" })
-
 SpinsTab:Button({ Text = "First Born", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "First Born")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "First Born")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Gemini", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Gemini")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Gemini")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Dark Magic", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Dark Magic")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Dark Magic")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Nature", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Nature")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Nature")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Psychic", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Psychic")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Psychic")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Vampire Traits" })
-
 SpinsTab:Button({ Text = "Ripper", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Ripper")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Ripper")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Augustine", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Augustine")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Augustine")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Vervain Immune", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Vervain Immunue")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Vervain Immune")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Werewolf Traits" })
-
 SpinsTab:Button({ Text = "Venomous", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Venomous")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Venomous")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Moon Blessed", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Moon Blessed")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Moon Blessed")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Human Traits" })
-
 SpinsTab:Button({ Text = "Hunter", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Doppelganger")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Hunter")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Doppelganger", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Doppelganger")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Doppelganger")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
-
 SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
-	local Event = game:GetService("ReplicatedStorage").Events.CharacterCreation
-	Event:FireServer("Trait", "Vervain Taker")
-	Menu:Notify({ Title = "Trait", Content = "Please reset and spawn in to play as your selected trait!", Type = "Info", Duration = 4 })
+	ReplicatedStorage.Events.CharacterCreation:FireServer("Trait", "Vervain Taker")
+	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
--- ============================================================
--- SHOP TAB
--- ============================================================
+-- SHOP
 ShopTab:BoldLabel({ Text = "Stake Shop" })
-
 local function buyWeapon(name)
-	local Event = game:GetService("ReplicatedStorage").Events.Shops
-	Event:FireServer("Weapon", name, 0)
+	ReplicatedStorage.Events.Shops:FireServer("Weapon", name, 0)
 end
-
 ShopTab:Button({ Text = "Wooden Stake", Callback = function() buyWeapon("Stake2") end })
 ShopTab:Button({ Text = "White Oak Stake", Callback = function() buyWeapon("White Oak Stake") end })
 ShopTab:Button({ Text = "Dagger", Callback = function() buyWeapon("Dagger") end })
@@ -195,98 +183,318 @@ ShopTab:Button({ Text = "Wolfsbane Grenade", Callback = function() buyWeapon("Wo
 
 ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Talisman" })
-
 local function buyTalisman(name)
-	local Event = game:GetService("ReplicatedStorage").Events.Shops
-	Event:FireServer("Talisman", name, 0)
+	ReplicatedStorage.Events.Shops:FireServer("Talisman", name, 0)
 end
-
 ShopTab:Button({ Text = "Dark", Callback = function() buyTalisman("Dark") end })
 ShopTab:Button({ Text = "Moon", Callback = function() buyTalisman("MoonTalis") end })
 ShopTab:Button({ Text = "Freya", Callback = function() buyTalisman("BlueTalis") end })
 ShopTab:Button({ Text = "Sun", Callback = function() buyTalisman("SunTalis") end })
 ShopTab:Button({ Text = "Emily", Callback = function() buyTalisman("ElderTalis") end })
-
--- Added talismans
 ShopTab:Button({ Text = "Green", Callback = function() buyTalisman("GreenTalis") end })
 ShopTab:Button({ Text = "Qetsiyah", Callback = function() buyTalisman("AncientTalis") end })
+
 ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Grimoire" })
-
 local function buyGrimoire(name)
-	local Event = game:GetService("ReplicatedStorage").Events.Shops
-	Event:FireServer("Grimoire", name, 0)
+	ReplicatedStorage.Events.Shops:FireServer("Grimoire", name, 0)
 end
-
 ShopTab:Button({ Text = "Burn Book", Callback = function() buyGrimoire("Sun") end })
 ShopTab:Button({ Text = "Death Note", Callback = function() buyGrimoire("Mystical") end })
 ShopTab:Button({ Text = "Valentine", Callback = function() buyGrimoire("Valentine") end })
 ShopTab:Button({ Text = "The Book of Shadows", Callback = function() buyGrimoire("Bos") end })
 
--- ============================================================
--- MONEY TAB
--- ============================================================
+-- MONEY
 MoneyTab:BoldLabel({ Text = "Money Methods" })
-
 MoneyTab:Button({
 	Text = "Money",
 	Description = "generate 5000000000 cash",
 	Icon = "dollar-sign",
 	Callback = function()
-		game:GetService("ReplicatedStorage").Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+		ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
 	end,
 })
 
--- ============================================================
--- ASSISTENCE TAB
--- ============================================================
-AssistenceTab:BoldLabel({ Text = "Candle Channel" })
+-- ASSISTENCE
+AssistenceTab:BoldLabel({ Text = "Auto Spells" })
 
+AssistenceTab:Button({
+	Text = "Auto Incendia",
+	Description = "Fires the Incendia spell event.",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Fire = Events and Events:FindFirstChild("Fire")
+		local FireSpell = Fire and Fire:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Incendia", Content = "FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Incendia", Content = "Incendia fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistenceTab:Divider()
+AssistenceTab:BoldLabel({ Text = "Candle Channel" })
 AssistenceTab:Button({
 	Text = "Candle Channel",
 	Description = "Fires the Fire event, waits 2 seconds, then fires Channeling.",
 	Icon = "flame",
 	Callback = function()
-		local FireEvent = game:GetService("ReplicatedStorage").Events.Fire
-		FireEvent:FireServer(
-			Vector3.new(-863, -9.4116239547729492, 558.57769775390625),
-			workspace.ChannelObjects:GetChildren()[50],
-			"Start"
-		)
-
-		Menu:Notify({ Title = "Assistence", Content = "Fire event fired. Waiting 2 seconds...", Type = "Info", Duration = 2 })
-
+		local FireEvent = ReplicatedStorage.Events.Fire
+		local ChannelObjects = workspace:FindFirstChild("ChannelObjects")
+		local ChannelingEvent = ReplicatedStorage.Events.Channeling
+		local Map = workspace:FindFirstChild("Map")
+		local Buyable = Map and Map:FindFirstChild("BuyableHouses")
+		local House1 = Buyable and Buyable:FindFirstChild("House1")
+		local Folder = House1 and House1:FindFirstChild("Folder")
+		local Mesh = Folder and Folder:FindFirstChild("mesh")
+		local MeshPart = Mesh and Mesh:FindFirstChild("s4studio_mesh_3.036")
+		if not (FireEvent and ChannelObjects and ChannelingEvent and MeshPart) then
+			Menu:Notify({ Title = "Candle Channel", Content = "Required objects missing.", Type = "Error", Duration = 3 })
+			return
+		end
+		local target = ChannelObjects:GetChildren()[50]
+		if not target then
+			Menu:Notify({ Title = "Candle Channel", Content = "No target at index 50.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireEvent:FireServer(Vector3.new(-863, -9.4116239547729492, 558.57769775390625), target, "Start")
+		Menu:Notify({ Title = "Assistence", Content = "Waiting 2 seconds...", Type = "Info", Duration = 2 })
 		task.wait(2)
-
-		local ChannelingEvent = game:GetService("ReplicatedStorage").Events.Channeling
-		ChannelingEvent:FireServer(
-			workspace.Map.BuyableHouses.House1.Folder.mesh["s4studio_mesh_3.036"]
-		)
-
-		Menu:Notify({ Title = "Assistence", Content = "Candle Channel complete.", Type = "Success", Duration = 3 })
+		ChannelingEvent:FireServer(MeshPart)
+		Menu:Notify({ Title = "Assistence", Content = "Complete.", Type = "Success", Duration = 3 })
 	end,
 })
 
--- ============================================================
--- VISUALS TAB - ESP Integration
--- ============================================================
-local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostDuckyy/ESP-Library/main/Kiriot22/source.lua"))()
+AssistenceTab:Divider()
+AssistenceTab:BoldLabel({ Text = "Auto Level Talisman" })
 
--- ---- Master Switch ----
-VisualsTab:BoldLabel({ Text = "Master" })
+local talismanInterval = 0.1
+
+AssistenceTab:Toggle({
+	Text = "Auto TalisUpgrade",
+	Description = "Continuously fires TalisUpgrade. Warning: will cause lag and may be kicked.",
+	Default = false,
+	Callback = function(value)
+		talismanAutoEnabled = value
+		if talismanThread then
+			pcall(function() task.cancel(talismanThread) end)
+			talismanThread = nil
+		end
+		if value then
+			talismanThread = task.spawn(function()
+				while talismanAutoEnabled do
+					local Events = ReplicatedStorage:FindFirstChild("Events")
+					local Quesst = Events and Events:FindFirstChild("Quesst")
+					if Quesst then
+						pcall(function() Quesst:FireServer("TalisUpgrade", 0) end)
+					end
+					task.wait(talismanInterval)
+				end
+			end)
+			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Enabled. Warning: will cause lag and may be kicked.", Type = "Warning", Duration = 4 })
+		else
+			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Disabled.", Type = "Info" })
+		end
+	end,
+})
+
+AssistenceTab:Slider({
+	Text = "Upgrade Interval",
+	Description = "Delay between each upgrade. Lower = faster. Warning: very low values will cause lag and may be kicked.",
+	Min = 0.001, Max = 2, Step = 0.001, Default = 0.1,
+	Suffix = " s",
+	Callback = function(value) talismanInterval = value end,
+})
+
+AssistenceTab:Button({
+	Text = "Fire Once",
+	Description = "Fires TalisUpgrade one time.",
+	Icon = "sparkles",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Quesst = Events and Events:FindFirstChild("Quesst")
+		if not Quesst then
+			Menu:Notify({ Title = "Auto Level Talisman", Content = "Quesst event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		Quesst:FireServer("TalisUpgrade", 0)
+		Menu:Notify({ Title = "Auto Level Talisman", Content = "Fired once.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- VISUALS
+VisualsTab:BoldLabel({ Text = "ESP" })
+
+local SPECIES_COLORS = {
+	Witch     = Color3.fromRGB(180,  80, 255),
+	Vampire   = Color3.fromRGB(255,  60,  60),
+	Werewolf  = Color3.fromRGB(255, 150,  40),
+	Siphoner  = Color3.fromRGB( 60, 180, 255),
+	Human     = Color3.fromRGB( 80, 255, 120),
+	Original  = Color3.fromRGB(255,  60,  60),
+	Hybrid    = Color3.fromRGB(255,   0, 200),
+	Heretic   = Color3.fromRGB(255, 105, 180),
+	Unknown   = Color3.fromRGB(200, 200, 200),
+}
+
+local POWER_SLOTS = {
+	"PowernameG","PowernameT","PowernameY","PowernameF","PowernameC",
+	"PowernameB","PowernameV","PowernameX","PowernameE","PowernameR",
+}
+
+local function checkHereticPowers(player)
+	local pd = player:FindFirstChild("PowerData")
+	if not pd then return false end
+	for _, slot in ipairs(POWER_SLOTS) do
+		local v = pd:FindFirstChild(slot)
+		if v and string.lower(tostring(v.Value)):find("heretic", 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+local function getSpecies(player)
+	local ds = player:FindFirstChild("DataSaves")
+	if not ds then return "Unknown" end
+	local function read(n)
+		local v = ds:FindFirstChild(n)
+		return v and tostring(v.Value) or ""
+	end
+	if checkHereticPowers(player) then
+		return "Heretic"
+	end
+	local tLower = string.lower(read("Trait"))
+	if tLower:find("original", 1, true) then return "Original" end
+	if tLower:find("hybrid", 1, true) then return "Hybrid" end
+	local species = read("Species")
+	if species == "" then return "Unknown" end
+	local sLower = string.lower(species)
+	if sLower:find("witch", 1, true)    then return "Witch"    end
+	if sLower:find("siphon", 1, true)   then return "Siphoner" end
+	if sLower:find("vampire", 1, true)  then return "Vampire"  end
+	if sLower:find("werewolf", 1, true) then return "Werewolf" end
+	if sLower:find("human", 1, true)    then return "Human"    end
+	return "Unknown"
+end
+
+local SpeciesDrawings = {}
+local speciesRenderConn = nil
+local speciesMasterOn = false
+
+local function createSpeciesText(player)
+	if SpeciesDrawings[player] then return SpeciesDrawings[player] end
+	local nameLabel = Drawing.new("Text")
+	nameLabel.Size = 16
+	nameLabel.Center = true
+	nameLabel.Outline = true
+	nameLabel.Visible = false
+	local infoLabel = Drawing.new("Text")
+	infoLabel.Size = 12
+	infoLabel.Center = true
+	infoLabel.Outline = true
+	infoLabel.Color = Color3.fromRGB(255, 255, 255)
+	infoLabel.Visible = false
+	local d = { name = nameLabel, info = infoLabel }
+	SpeciesDrawings[player] = d
+	return d
+end
+
+local function destroySpeciesText(player)
+	local d = SpeciesDrawings[player]
+	if not d then return end
+	for _, dr in pairs(d) do pcall(function() dr:Remove() end) end
+	SpeciesDrawings[player] = nil
+end
+
+local function clearAllSpeciesText()
+	for p in pairs(SpeciesDrawings) do destroySpeciesText(p) end
+end
+
+local function startSpeciesRender()
+	if speciesRenderConn then return end
+	speciesRenderConn = RunService.RenderStepped:Connect(function()
+		local camera = workspace.CurrentCamera
+		if not camera then return end
+		for p in pairs(SpeciesDrawings) do
+			local valid = p.Parent
+				and p ~= LocalPlayer
+				and speciesMasterOn
+				and p.Character
+				and p.Character:FindFirstChild("Head")
+				and p.Character:FindFirstChildOfClass("Humanoid")
+				and p.Character:FindFirstChildOfClass("Humanoid").Health > 0
+			if not valid then
+				destroySpeciesText(p)
+			end
+		end
+		if not speciesMasterOn then return end
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local head = player.Character:FindFirstChild("Head")
+				local hum  = player.Character:FindFirstChildOfClass("Humanoid")
+				if head and hum and hum.Health > 0 then
+					local d = createSpeciesText(player)
+					local species = getSpecies(player)
+					local color = SPECIES_COLORS[species] or SPECIES_COLORS.Unknown
+					local headPos, onScreen = camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.5, 0))
+					local dist = math.floor((camera.CFrame.Position - head.Position).Magnitude + 0.5)
+					if onScreen then
+						d.name.Text = player.Name
+						d.name.Color = color
+						d.name.Position = Vector2.new(headPos.X, headPos.Y)
+						d.name.Visible = true
+						d.info.Text = string.format("%s - %dhp - %d stud", species, math.floor(hum.Health), dist)
+						d.info.Color = Color3.fromRGB(255, 255, 255)
+						d.info.Position = Vector2.new(headPos.X, headPos.Y + 16)
+						d.info.Visible = true
+					else
+						d.name.Visible = false
+						d.info.Visible = false
+					end
+				end
+			end
+		end
+	end)
+end
+
+local function stopSpeciesRender()
+	if speciesRenderConn then speciesRenderConn:Disconnect(); speciesRenderConn = nil end
+	clearAllSpeciesText()
+	speciesMasterOn = false
+end
+
+Players.PlayerAdded:Connect(function(p)
+	p.CharacterRemoving:Connect(function()
+		destroySpeciesText(p)
+	end)
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+	p.CharacterRemoving:Connect(function()
+		destroySpeciesText(p)
+	end)
+end
+
+Players.PlayerRemoving:Connect(function(p)
+	destroySpeciesText(p)
+end)
 
 VisualsTab:Toggle({
 	Text = "Enable ESP",
-	Description = "Master switch for every ESP feature below.",
+	Description = "Shows player names colored by species with HP and distance.",
 	Default = false,
 	Callback = function(value)
-		ESP:Toggle(value)
+		if value == speciesMasterOn then return end
+		speciesMasterOn = value
+		if value then startSpeciesRender() else stopSpeciesRender() end
 	end,
 })
 
 VisualsTab:Divider()
-
--- ---- Plants (Healing Herb / Vervain / Wolfsbane) ----
 VisualsTab:BoldLabel({ Text = "Plants" })
 
 local PLANT_CONFIG = {
@@ -295,9 +503,9 @@ local PLANT_CONFIG = {
 	["Wolfsbane"]    = { Color = Color3.fromRGB(180, 120, 255), Label = "Wolfsbane",    Enabled = false },
 }
 
--- Our own drawing storage: [plantInstance] = { label = Drawing }
 local PlantDrawings = {}
 local plantRenderConn = nil
+local plantChildConn = nil
 
 local function getPlantConfig(obj)
 	if not obj or not obj:IsA("BasePart") then return nil end
@@ -306,43 +514,33 @@ end
 
 local function createPlantDrawing(obj, cfg)
 	if PlantDrawings[obj] then return end
-
-	local drawings = {}
-
-	drawings.label = Drawing.new("Text")
-	drawings.label.Size = 16
-	drawings.label.Center = true
-	drawings.label.Outline = true
-	drawings.label.Color = cfg.Color
-	drawings.label.Transparency = 1
-	drawings.label.Visible = false
-
-	PlantDrawings[obj] = drawings
+	local label = Drawing.new("Text")
+	label.Size = 16
+	label.Center = true
+	label.Outline = true
+	label.Color = cfg.Color
+	label.Visible = false
+	PlantDrawings[obj] = { label = label }
 end
 
 local function destroyPlantDrawing(obj)
 	local d = PlantDrawings[obj]
 	if not d then return end
-	for _, drawing in pairs(d) do
-		pcall(function() drawing:Remove() end)
-	end
+	for _, drawing in pairs(d) do pcall(function() drawing:Remove() end) end
 	PlantDrawings[obj] = nil
 end
 
 local function destroyAllPlantDrawings()
-	for obj, _ in pairs(PlantDrawings) do
-		destroyPlantDrawing(obj)
-	end
+	for obj in pairs(PlantDrawings) do destroyPlantDrawing(obj) end
 end
 
 local function refreshPlantSet()
-	for _, obj in ipairs(workspace.Map.Plants:GetChildren()) do
+	local map = workspace:FindFirstChild("Map")
+	local plants = map and map:FindFirstChild("Plants")
+	if not plants then return end
+	for _, obj in ipairs(plants:GetChildren()) do
 		local cfg = getPlantConfig(obj)
-		if cfg and cfg.Enabled then
-			createPlantDrawing(obj, cfg)
-		else
-			destroyPlantDrawing(obj)
-		end
+		if cfg and cfg.Enabled then createPlantDrawing(obj, cfg) else destroyPlantDrawing(obj) end
 	end
 end
 
@@ -351,20 +549,14 @@ local function startPlantRenderer()
 	plantRenderConn = RunService.RenderStepped:Connect(function()
 		local camera = workspace.CurrentCamera
 		if not camera then return end
-
 		for obj, drawings in pairs(PlantDrawings) do
 			local cfg = getPlantConfig(obj)
 			if not cfg or not cfg.Enabled or not obj.Parent then
 				destroyPlantDrawing(obj)
 				continue
 			end
-
 			local pos, onScreen = camera:WorldToViewportPoint(obj.Position)
-			if not onScreen then
-				drawings.label.Visible = false
-				continue
-			end
-
+			if not onScreen then drawings.label.Visible = false; continue end
 			local distance = (camera.CFrame.Position - obj.Position).Magnitude
 			drawings.label.Text = string.format("%s (%d away)", cfg.Label, math.floor(distance + 0.5))
 			drawings.label.Position = Vector2.new(pos.X, pos.Y)
@@ -374,121 +566,96 @@ local function startPlantRenderer()
 end
 
 local function stopPlantRenderer()
-	if plantRenderConn then
-		plantRenderConn:Disconnect()
-		plantRenderConn = nil
-	end
+	if plantRenderConn then plantRenderConn:Disconnect(); plantRenderConn = nil end
+	if plantChildConn then plantChildConn:Disconnect(); plantChildConn = nil end
 end
 
--- Pick up newly-spawned plants
-workspace.Map.Plants.ChildAdded:Connect(function(obj)
-	task.wait(0.1)
-	local cfg = getPlantConfig(obj)
-	if cfg and cfg.Enabled then
-		createPlantDrawing(obj, cfg)
-	end
+task.spawn(function()
+	local map = workspace:WaitForChild("Map", 15)
+	local plants = map and map:WaitForChild("Plants", 15)
+	if not plants then return end
+	startPlantRenderer()
+	refreshPlantSet()
+	plantChildConn = plants.ChildAdded:Connect(function(obj)
+		task.wait(0.1)
+		local cfg = getPlantConfig(obj)
+		if cfg and cfg.Enabled then createPlantDrawing(obj, cfg) end
+	end)
 end)
 
-startPlantRenderer()
-refreshPlantSet()
+for plantName, cfg in pairs(PLANT_CONFIG) do
+	VisualsTab:Toggle({
+		Text = plantName,
+		Description = "Highlight " .. plantName .. " plants.",
+		Default = false,
+		Callback = function(value)
+			cfg.Enabled = value
+			refreshPlantSet()
+			Menu:Notify({
+				Title = "ESP",
+				Content = plantName .. " ESP " .. (value and "enabled." or "disabled."),
+				Type = value and "Success" or "Info",
+				Duration = 2,
+			})
+		end,
+	})
+end
 
-VisualsTab:Toggle({
-	Text = "Healing Herb",
-	Description = "Highlight Healing Herbs only.",
-	Default = false,
-	Callback = function(value)
-		PLANT_CONFIG["Healing Herb"].Enabled = value
-		refreshPlantSet()
-		Menu:Notify({
-			Title = "ESP",
-			Content = "Healing Herb ESP " .. (value and "enabled." or "disabled."),
-			Type = value and "Success" or "Info",
-			Duration = 2,
-		})
-	end,
-})
-
-VisualsTab:Toggle({
-	Text = "Vervain",
-	Description = "Highlight Vervain plants only.",
-	Default = false,
-	Callback = function(value)
-		PLANT_CONFIG["Vervain"].Enabled = value
-		refreshPlantSet()
-		Menu:Notify({
-			Title = "ESP",
-			Content = "Vervain ESP " .. (value and "enabled." or "disabled."),
-			Type = value and "Success" or "Info",
-			Duration = 2,
-		})
-	end,
-})
-
-VisualsTab:Toggle({
-	Text = "Wolfsbane",
-	Description = "Highlight Wolfsbane plants only.",
-	Default = false,
-	Callback = function(value)
-		PLANT_CONFIG["Wolfsbane"].Enabled = value
-		refreshPlantSet()
-		Menu:Notify({
-			Title = "ESP",
-			Content = "Wolfsbane ESP " .. (value and "enabled." or "disabled."),
-			Type = value and "Success" or "Info",
-			Duration = 2,
-		})
-	end,
-})
-
+-- Plant Teleport (inside Visuals, below Plants)
 VisualsTab:Divider()
+VisualsTab:BoldLabel({ Text = "Plant Teleport" })
 
--- ---- Components ----
-VisualsTab:BoldLabel({ Text = "Components" })
-
-VisualsTab:Toggle({
-	Text = "Boxes",
-	Description = "Draw bounding boxes around players.",
-	Default = true,
+VisualsTab.PlantDropdown = VisualsTab:Dropdown({
+	Text = "Select Plant",
+	Options = { "Healing Herb", "Vervain", "Wolfsbane" },
+	Default = nil,
 	Callback = function(value)
-		ESP.Boxes = value
+		VisualsTab._plantTarget = value
 	end,
 })
 
-VisualsTab:Toggle({
-	Text = "Tracers",
-	Description = "Draw lines from the bottom of the screen to players.",
-	Default = false,
-	Callback = function(value)
-		ESP.Tracers = value
+VisualsTab:Button({
+	Text = "Teleport to Nearest",
+	Description = "Teleports you to the closest selected plant.",
+	Icon = "flower",
+	Callback = function()
+		local plantName = VisualsTab._plantTarget
+		if not plantName then
+			Menu:Notify({ Title = "Plant TP", Content = "No plant selected.", Type = "Warning" })
+			return
+		end
+		local map = workspace:FindFirstChild("Map")
+		local plants = map and map:FindFirstChild("Plants")
+		if not plants then
+			Menu:Notify({ Title = "Plant TP", Content = "Plants folder not found.", Type = "Error" })
+			return
+		end
+		local myChar = LocalPlayer.Character
+		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+		if not myRoot then
+			Menu:Notify({ Title = "Plant TP", Content = "Character not ready.", Type = "Error" })
+			return
+		end
+		local closest, closestDist = nil, math.huge
+		for _, obj in ipairs(plants:GetChildren()) do
+			if obj.Name == plantName and obj:IsA("BasePart") then
+				local dist = (obj.Position - myRoot.Position).Magnitude
+				if dist < closestDist then
+					closestDist = dist
+					closest = obj
+				end
+			end
+		end
+		if not closest then
+			Menu:Notify({ Title = "Plant TP", Content = "No " .. plantName .. " found.", Type = "Warning" })
+			return
+		end
+		myRoot.CFrame = CFrame.new(closest.Position + Vector3.new(0, 3, 0))
+		Menu:Notify({ Title = "Plant TP", Content = "Teleported to " .. plantName .. " (" .. math.floor(closestDist) .. " studs).", Type = "Success" })
 	end,
 })
 
-VisualsTab:Toggle({
-	Text = "Names",
-	Description = "Show player names above the boxes.",
-	Default = false,
-	Callback = function(value)
-		ESP.Names = value
-	end,
-})
-
-VisualsTab:Divider()
-
--- ---- Filters ----
-VisualsTab:BoldLabel({ Text = "Filters" })
-
-VisualsTab:Toggle({
-	Text = "Show Players",
-	Description = "Include actual players in the ESP.",
-	Default = true,
-	Callback = function(value)
-		ESP.Players = value
-	end,
-})
-
--- ============================================================
--- WORLD TAB - Fly, Speed, Noclip, Teleport, Infinite Yield
--- ============================================================
+-- WORLD
 local function getPlayerList()
 	local list = {}
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -506,6 +673,67 @@ local flySpeed = 50
 local flyConnection = nil
 local flyBodyVelocity = nil
 local flyBodyGyro = nil
+local flyCharacterConn = nil
+
+local function stopFly()
+	if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+	if flyBodyVelocity then flyBodyVelocity:Destroy(); flyBodyVelocity = nil end
+	if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
+	if flyCharacterConn then flyCharacterConn:Disconnect(); flyCharacterConn = nil end
+	local char = LocalPlayer.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if humanoid then humanoid.PlatformStand = false end
+end
+
+local function startFly()
+	if flyBodyVelocity or flyBodyGyro or flyConnection then
+		stopFly()
+	end
+	local char = LocalPlayer.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid then
+		Menu:Notify({ Title = "Fly", Content = "Character not ready.", Type = "Warning" })
+		return false
+	end
+	flyBodyVelocity = Instance.new("BodyVelocity")
+	flyBodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+	flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+	flyBodyVelocity.Parent = root
+	flyBodyGyro = Instance.new("BodyGyro")
+	flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+	flyBodyGyro.P = 9e4
+	flyBodyGyro.CFrame = root.CFrame
+	flyBodyGyro.Parent = root
+	humanoid.PlatformStand = true
+	local camera = workspace.CurrentCamera
+	flyConnection = RunService.RenderStepped:Connect(function()
+		if not flyEnabled then return end
+		local c = LocalPlayer.Character
+		local r = c and c:FindFirstChild("HumanoidRootPart")
+		if not r then return end
+		local moveDir = Vector3.new(0, 0, 0)
+		if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
+			or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then
+			moveDir = moveDir - Vector3.new(0, 1, 0)
+		end
+		if moveDir.Magnitude > 0 then moveDir = moveDir.Unit * flySpeed end
+		flyBodyVelocity.Velocity = moveDir
+		flyBodyGyro.CFrame = camera.CFrame
+	end)
+	if not flyCharacterConn then
+		flyCharacterConn = LocalPlayer.CharacterAdded:Connect(function()
+			task.wait(0.5)
+			if flyEnabled then stopFly(); startFly() end
+		end)
+	end
+	return true
+end
 
 WorldTab:Toggle({
 	Text = "Enable Fly",
@@ -513,85 +741,14 @@ WorldTab:Toggle({
 	Default = false,
 	Callback = function(value)
 		flyEnabled = value
-
-		local char = LocalPlayer.Character
-		local root = char and char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-
 		if value then
-			if not root or not humanoid then
-				Menu:Notify({ Title = "Fly", Content = "Character not ready.", Type = "Warning" })
+			if startFly() then
+				Menu:Notify({ Title = "Fly", Content = "Enabled.", Type = "Success" })
+			else
 				flyEnabled = false
-				return
 			end
-
-			flyBodyVelocity = Instance.new("BodyVelocity")
-			flyBodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-			flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
-			flyBodyVelocity.Parent = root
-
-			flyBodyGyro = Instance.new("BodyGyro")
-			flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-			flyBodyGyro.P = 9e4
-			flyBodyGyro.CFrame = root.CFrame
-			flyBodyGyro.Parent = root
-
-			humanoid.PlatformStand = true
-
-			local camera = workspace.CurrentCamera
-
-			flyConnection = RunService.RenderStepped:Connect(function()
-				if not flyEnabled then return end
-
-				local char = LocalPlayer.Character
-				local root = char and char:FindFirstChild("HumanoidRootPart")
-				if not root then return end
-
-				local moveDir = Vector3.new(0, 0, 0)
-				if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-					moveDir = moveDir + camera.CFrame.LookVector
-				end
-				if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-					moveDir = moveDir - camera.CFrame.LookVector
-				end
-				if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-					moveDir = moveDir - camera.CFrame.RightVector
-				end
-				if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-					moveDir = moveDir + camera.CFrame.RightVector
-				end
-				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-					moveDir = moveDir + Vector3.new(0, 1, 0)
-				end
-				if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-					moveDir = moveDir - Vector3.new(0, 1, 0)
-				end
-
-				if moveDir.Magnitude > 0 then
-					moveDir = moveDir.Unit * flySpeed
-				end
-
-				flyBodyVelocity.Velocity = moveDir
-				flyBodyGyro.CFrame = camera.CFrame
-			end)
-
-			Menu:Notify({ Title = "Fly", Content = "Enabled.", Type = "Success" })
 		else
-			if flyConnection then
-				flyConnection:Disconnect()
-				flyConnection = nil
-			end
-			if flyBodyVelocity then
-				flyBodyVelocity:Destroy()
-				flyBodyVelocity = nil
-			end
-			if flyBodyGyro then
-				flyBodyGyro:Destroy()
-				flyBodyGyro = nil
-			end
-			if humanoid then
-				humanoid.PlatformStand = false
-			end
+			stopFly()
 			Menu:Notify({ Title = "Fly", Content = "Disabled.", Type = "Info" })
 		end
 	end,
@@ -600,18 +757,12 @@ WorldTab:Toggle({
 WorldTab:Slider({
 	Text = "Fly Speed",
 	Description = "How fast you fly.",
-	Min = 10,
-	Max = 300,
-	Step = 5,
-	Default = 50,
+	Min = 10, Max = 300, Step = 5, Default = 50,
 	Suffix = " studs/s",
-	Callback = function(value)
-		flySpeed = value
-	end,
+	Callback = function(value) flySpeed = value end,
 })
 
 WorldTab:Divider()
-
 WorldTab:BoldLabel({ Text = "Speed" })
 
 local speedEnabled = false
@@ -621,9 +772,7 @@ local speedConnection = nil
 local function applySpeed()
 	local char = LocalPlayer.Character
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-	if humanoid then
-		humanoid.WalkSpeed = speedValue
-	end
+	if humanoid then humanoid.WalkSpeed = speedValue end
 end
 
 WorldTab:Toggle({
@@ -632,7 +781,6 @@ WorldTab:Toggle({
 	Default = false,
 	Callback = function(value)
 		speedEnabled = value
-
 		if value then
 			speedConnection = RunService.Heartbeat:Connect(function()
 				if not speedEnabled then return end
@@ -641,15 +789,10 @@ WorldTab:Toggle({
 			applySpeed()
 			Menu:Notify({ Title = "Speed", Content = "Enabled.", Type = "Success" })
 		else
-			if speedConnection then
-				speedConnection:Disconnect()
-				speedConnection = nil
-			end
+			if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
 			local char = LocalPlayer.Character
 			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				humanoid.WalkSpeed = 16
-			end
+			if humanoid then humanoid.WalkSpeed = 16 end
 			Menu:Notify({ Title = "Speed", Content = "Disabled.", Type = "Info" })
 		end
 	end,
@@ -658,25 +801,29 @@ WorldTab:Toggle({
 WorldTab:Slider({
 	Text = "Speed Value",
 	Description = "Your character's walk speed.",
-	Min = 16,
-	Max = 500,
-	Step = 1,
-	Default = 16,
+	Min = 16, Max = 500, Step = 1, Default = 50,
 	Suffix = " studs/s",
 	Callback = function(value)
 		speedValue = value
-		if speedEnabled then
-			applySpeed()
-		end
+		if speedEnabled then applySpeed() end
 	end,
 })
 
 WorldTab:Divider()
-
 WorldTab:BoldLabel({ Text = "Noclip" })
 
 local noclipEnabled = false
 local noclipConnection = nil
+local noclipModified = {}
+
+local function clearNoclipTracking()
+	for part in pairs(noclipModified) do
+		if part and part.Parent then
+			pcall(function() part.CanCollide = true end)
+		end
+	end
+	noclipModified = {}
+end
 
 WorldTab:Toggle({
 	Text = "Enable Noclip",
@@ -684,7 +831,6 @@ WorldTab:Toggle({
 	Default = false,
 	Callback = function(value)
 		noclipEnabled = value
-
 		if value then
 			noclipConnection = RunService.Stepped:Connect(function()
 				if not noclipEnabled then return end
@@ -692,39 +838,66 @@ WorldTab:Toggle({
 				if not char then return end
 				for _, part in ipairs(char:GetDescendants()) do
 					if part:IsA("BasePart") and part.CanCollide then
+						noclipModified[part] = true
 						part.CanCollide = false
 					end
 				end
 			end)
 			Menu:Notify({ Title = "Noclip", Content = "Enabled.", Type = "Success" })
 		else
-			if noclipConnection then
-				noclipConnection:Disconnect()
-				noclipConnection = nil
-			end
-			local char = LocalPlayer.Character
-			if char then
-				for _, part in ipairs(char:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = true
-					end
-				end
-			end
+			if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
+			clearNoclipTracking()
 			Menu:Notify({ Title = "Noclip", Content = "Disabled.", Type = "Info" })
 		end
 	end,
 })
 
-WorldTab:Divider()
+LocalPlayer.CharacterAdded:Connect(function()
+	clearNoclipTracking()
+	if noclipEnabled then
+		task.wait(0.5)
+		local char = LocalPlayer.Character
+		if char then
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") and part.CanCollide then
+					noclipModified[part] = true
+					part.CanCollide = false
+				end
+			end
+		end
+	end
+end)
 
+WorldTab:Divider()
 WorldTab:BoldLabel({ Text = "Teleport" })
 
-WorldTab:Dropdown({
+local function refreshTeleportDropdown()
+	local names = getPlayerList()
+	WorldTab._teleportTarget = nil
+	local ok, err = pcall(function()
+		WorldTab.TeleportDropdown:SetOptions(names, nil, true)
+	end)
+	if not ok then
+		warn("[TVR Script] Dropdown refresh failed: " .. tostring(err))
+		Menu:Notify({ Title = "Teleport", Content = "Refresh failed: " .. tostring(err), Type = "Warning", Duration = 3 })
+	end
+end
+
+WorldTab.TeleportDropdown = WorldTab:Dropdown({
 	Text = "Select Player to Teleport To",
 	Options = getPlayerList(),
 	Default = nil,
 	Callback = function(value)
 		WorldTab._teleportTarget = value
+	end,
+})
+
+WorldTab:Button({
+	Text = "Refresh Player List",
+	Description = "Reloads the player list in case someone joined or left.",
+	Icon = "refresh-cw",
+	Callback = function()
+		refreshTeleportDropdown()
 	end,
 })
 
@@ -738,44 +911,37 @@ WorldTab:Button({
 			Menu:Notify({ Title = "Teleport", Content = "No player selected.", Type = "Warning" })
 			return
 		end
-
 		local targetPlayer = Players:FindFirstChild(targetName)
 		if not targetPlayer then
 			Menu:Notify({ Title = "Teleport", Content = "Player not found.", Type = "Error" })
 			return
 		end
-
 		local targetChar = targetPlayer.Character
 		if not targetChar then
 			Menu:Notify({ Title = "Teleport", Content = "Target has no character.", Type = "Error" })
 			return
 		end
-
 		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
 		if not targetRoot then
 			Menu:Notify({ Title = "Teleport", Content = "Target root not found.", Type = "Error" })
 			return
 		end
-
 		local myChar = LocalPlayer.Character
 		if not myChar then
 			Menu:Notify({ Title = "Teleport", Content = "You have no character.", Type = "Error" })
 			return
 		end
-
 		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
 		if not myRoot then
 			Menu:Notify({ Title = "Teleport", Content = "Your root not found.", Type = "Error" })
 			return
 		end
-
 		myRoot.CFrame = targetRoot.CFrame
 		Menu:Notify({ Title = "Teleport", Content = "Teleported to " .. targetName, Type = "Success" })
 	end,
 })
 
 WorldTab:Divider()
-
 WorldTab:BoldLabel({ Text = "Enable Infinite Yield" })
 
 WorldTab:Button({
@@ -788,9 +954,7 @@ WorldTab:Button({
 	end,
 })
 
--- ============================================================
--- INTERFACE TAB
--- ============================================================
+-- INTERFACE
 InterfaceTab:BoldLabel({ Text = "Appearance" })
 
 InterfaceTab:Dropdown({
@@ -808,21 +972,14 @@ InterfaceTab:Dropdown({
 })
 
 InterfaceTab:Divider()
-
-InterfaceTab:Label({
-	Text = "Press <b>K</b> at any time to show or hide this window.",
-})
-
-InterfaceTab:Label({
-	Text = "Press the minimize button to close / hide the UI.",
-})
+InterfaceTab:Label({ Text = "Press K to show or hide the window." })
 
 InterfaceTab:Divider()
 InterfaceTab:BoldLabel({ Text = "Server" })
 
 InterfaceTab:Button({
 	Text = "Rejoin Same Server",
-	Description = "Reconnects you to this exact server (same JobId).",
+	Description = "Reconnects you to this exact server.",
 	Icon = "refresh-cw",
 	Callback = function()
 		Menu:Notify({ Title = "Rejoin", Content = "Rejoining same server...", Type = "Info", Duration = 2 })
@@ -833,7 +990,7 @@ InterfaceTab:Button({
 
 InterfaceTab:Button({
 	Text = "Rejoin New Server",
-	Description = "Sends you to a random new server of the same game.",
+	Description = "Sends you to a random new server.",
 	Icon = "shuffle",
 	Callback = function()
 		Menu:Notify({ Title = "Rejoin", Content = "Joining a new server...", Type = "Info", Duration = 2 })
@@ -850,55 +1007,28 @@ InterfaceTab:Button({
 	Description = "Completely unloads the script.",
 	Icon = "power",
 	Callback = function()
-		if flyConnection then flyConnection:Disconnect() end
-		if flyBodyVelocity then flyBodyVelocity:Destroy() end
-		if flyBodyGyro then flyBodyGyro:Destroy() end
-
+		stopTalismanLoop()
+		pcall(stopFly)
+		if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
 		local char = LocalPlayer.Character
 		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			humanoid.PlatformStand = false
 			humanoid.WalkSpeed = 16
 		end
-
-		if speedConnection then speedConnection:Disconnect() end
-		if noclipConnection then noclipConnection:Disconnect() end
-		if char then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = true
-				end
-			end
-		end
-
-		pcall(function()
-			ESP:Toggle(false)
-		end)
-
-		pcall(function()
-			destroyAllPlantDrawings()
-			stopPlantRenderer()
-		end)
-
-		pcall(function()
-			Menu:Destroy()
-		end)
-
-		if getgenv then
-			getgenv().__ArmentaLibExample = nil
-		end
-
+		if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
+		clearNoclipTracking()
+		pcall(function() destroyAllPlantDrawings(); stopPlantRenderer() end)
+		pcall(function() stopSpeciesRender() end)
+		pcall(function() Menu:Destroy() end)
+		if getgenv then getgenv().__ArmentaLibExample = nil end
 		print("[TVR Script] Ejected.")
 	end,
 })
 
--- ============================================================
 -- INPUT & CLEANUP
--- ============================================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then
-		return
-	end
+	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.K then
 		Menu:ToggleVisibility()
 	end
@@ -907,9 +1037,14 @@ end)
 Menu:OnMinimizeChanged(function(minimized) end)
 
 Menu:OnDestroy(function()
-	if getgenv then
-		getgenv().__ArmentaLibExample = nil
-	end
+	stopTalismanLoop()
+	pcall(stopFly)
+	if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
+	if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
+	clearNoclipTracking()
+	pcall(function() destroyAllPlantDrawings(); stopPlantRenderer() end)
+	pcall(function() stopSpeciesRender() end)
+	if getgenv then getgenv().__ArmentaLibExample = nil end
 end)
 
 Menu:Notify({
