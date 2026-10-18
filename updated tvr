@@ -1,9 +1,9 @@
-if getgenv then
-	if getgenv().__ArmentaLibExample then
-		pcall(function()
-			getgenv().__ArmentaLibExample:Destroy()
-		end)
-	end
+local genv = (type(getgenv) == "function" and getgenv()) or (type(getgenv) == "table" and getgenv) or nil
+
+if genv and genv.__ArmentaLibExample then
+	pcall(function()
+		genv.__ArmentaLibExample:Destroy()
+	end)
 end
 
 local LIB_URL = "https://raw.githubusercontent.com/Xyraniz/VaultUI/refs/heads/main/Libraries/Armenta-Lib/source.lua"
@@ -32,14 +32,14 @@ local Menu = FyyUI.Menu({
 	},
 })
 
-if getgenv then
-	getgenv().__ArmentaLibExample = Menu
+if genv then
+	genv.__ArmentaLibExample = Menu
 end
 
 local SpinsTab = Menu:Tab({ Text = "Spins" })
 local ShopTab = Menu:Tab({ Text = "Shop" })
 local MoneyTab = Menu:Tab({ Text = "Money" })
-local AssistenceTab = Menu:Tab({ Text = "Assistence" })
+local AssistanceTab = Menu:Tab({ Text = "Assistance" })
 local VisualsTab = Menu:Tab({ Text = "Visuals" })
 local WorldTab = Menu:Tab({ Text = "World" })
 local InterfaceTab = Menu:Tab({ Text = "Interface" })
@@ -50,6 +50,9 @@ local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
+
+-- FIX: guard so fullCleanup only runs once even if called from both EJECT and OnDestroy.
+local cleanedUp = false
 
 local talismanAutoEnabled = false
 local talismanThread = nil
@@ -62,11 +65,10 @@ local function stopTalismanLoop()
 	end
 end
 
--- SPINS
 SpinsTab:BoldLabel({ Text = "Add Spins" })
 SpinsTab:Button({
 	Text = "Add Spins",
-	Description = "Adds spins via the CharacterCreation event.",
+	Description = "Adds spins to your spins tab in menu",
 	Icon = "dice",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
@@ -76,33 +78,48 @@ SpinsTab:Button({
 			return
 		end
 		CharacterCreation:FireServer("Spins", -1000000)
-		Menu:Notify({ Title = "Add Spins", Content = "Spins event fired.", Type = "Success", Duration = 3 })
+		Menu:Notify({ Title = "Add Spins", Content = "Spins event fired. Warning: negative spin cost is an exploit and may be flagged.", Type = "Warning", Duration = 4 })
 	end,
 })
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Species" })
 
-SpinsTab:Button({ Text = "Spawn Witch", Callback = function()
-	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Witch")
-	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
-end })
-SpinsTab:Button({ Text = "Spawn Siphoner", Callback = function()
-	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Siphoner")
-	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
-end })
-SpinsTab:Button({ Text = "Spawn Vampire", Callback = function()
-	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Vampire")
-	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
-end })
-SpinsTab:Button({ Text = "Spawn Werewolf", Callback = function()
-	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Werewolf")
-	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
-end })
-SpinsTab:Button({ Text = "Spawn Human", Callback = function()
-	ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Human")
-	Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
-end })
+SpinsTab:Button({
+	Text = "Spawn Witch",
+	Callback = function()
+		ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Witch")
+		Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
+	end,
+})
+SpinsTab:Button({
+	Text = "Spawn Siphoner",
+	Callback = function()
+		ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Siphoner")
+		Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
+	end,
+})
+SpinsTab:Button({
+	Text = "Spawn Vampire",
+	Callback = function()
+		ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Vampire")
+		Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
+	end,
+})
+SpinsTab:Button({
+	Text = "Spawn Werewolf",
+	Callback = function()
+		ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Werewolf")
+		Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
+	end,
+})
+SpinsTab:Button({
+	Text = "Spawn Human",
+	Callback = function()
+		ReplicatedStorage.Events.CharacterCreation:FireServer("Species", "Human")
+		Menu:Notify({ Title = "Species", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
+	end,
+})
 
 SpinsTab:Divider()
 SpinsTab:BoldLabel({ Text = "Witch Traits" })
@@ -168,7 +185,6 @@ SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
 	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
--- SHOP
 ShopTab:BoldLabel({ Text = "Stake Shop" })
 local function buyWeapon(name)
 	ReplicatedStorage.Events.Shops:FireServer("Weapon", name, 0)
@@ -204,23 +220,27 @@ ShopTab:Button({ Text = "Death Note", Callback = function() buyGrimoire("Mystica
 ShopTab:Button({ Text = "Valentine", Callback = function() buyGrimoire("Valentine") end })
 ShopTab:Button({ Text = "The Book of Shadows", Callback = function() buyGrimoire("Bos") end })
 
--- MONEY
 MoneyTab:BoldLabel({ Text = "Money Methods" })
 MoneyTab:Button({
 	Text = "Money",
-	Description = "generate 5000000000 cash",
+	Description = "generates you money",
 	Icon = "dollar-sign",
 	Callback = function()
-		ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+		local ok, err = pcall(function()
+			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+		end)
+		if ok then
+			Menu:Notify({ Title = "Money", Content = "Fired. Warning: negative-price exploit may be flagged.", Type = "Warning", Duration = 4 })
+		else
+			Menu:Notify({ Title = "Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
+		end
 	end,
 })
 
--- ASSISTENCE
-AssistenceTab:BoldLabel({ Text = "Auto Spells" })
+AssistanceTab:BoldLabel({ Text = "Auto Spells" })
 
-AssistenceTab:Button({
+AssistanceTab:Button({
 	Text = "Auto Incendia",
-	Description = "Fires the Incendia spell event.",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
@@ -235,11 +255,11 @@ AssistenceTab:Button({
 	end,
 })
 
-AssistenceTab:Divider()
-AssistenceTab:BoldLabel({ Text = "Candle Channel" })
-AssistenceTab:Button({
+AssistanceTab:Divider()
+AssistanceTab:BoldLabel({ Text = "Candle Channel" })
+AssistanceTab:Button({
 	Text = "Candle Channel",
-	Description = "Fires the Fire event, waits 2 seconds, then fires Channeling.",
+	Description = "Auto incendias and channels nearby candles",
 	Icon = "flame",
 	Callback = function()
 		local FireEvent = ReplicatedStorage.Events.Fire
@@ -255,27 +275,171 @@ AssistenceTab:Button({
 			Menu:Notify({ Title = "Candle Channel", Content = "Required objects missing.", Type = "Error", Duration = 3 })
 			return
 		end
-		local target = ChannelObjects:GetChildren()[50]
-		if not target then
-			Menu:Notify({ Title = "Candle Channel", Content = "No target at index 50.", Type = "Error", Duration = 3 })
+		local children = ChannelObjects:GetChildren()
+		local target = children[math.min(50, #children)]
+		if not target or not target:IsA("BasePart") then
+			Menu:Notify({ Title = "Candle Channel", Content = "No target candle found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireEvent:FireServer(Vector3.new(-863, -9.4116239547729492, 558.57769775390625), target, "Start")
-		Menu:Notify({ Title = "Assistence", Content = "Waiting 2 seconds...", Type = "Info", Duration = 2 })
+		Menu:Notify({ Title = "Assistance", Content = "Waiting 2 seconds...", Type = "Info", Duration = 2 })
 		task.wait(2)
 		ChannelingEvent:FireServer(MeshPart)
-		Menu:Notify({ Title = "Assistence", Content = "Complete.", Type = "Success", Duration = 3 })
+		Menu:Notify({ Title = "Assistance", Content = "Complete.", Type = "Success", Duration = 3 })
 	end,
 })
 
-AssistenceTab:Divider()
-AssistenceTab:BoldLabel({ Text = "Auto Level Talisman" })
+AssistanceTab:Divider()
+AssistanceTab:BoldLabel({ Text = "NPC Teleport" })
+
+local function getNPCNames()
+	local names = { "Landon" }
+	local seen = { Landon = true }
+	local map = workspace:FindFirstChild("Map")
+	local folder = map and map:FindFirstChild("NPC")
+	if folder then
+		for _, npc in ipairs(folder:GetChildren()) do
+			if npc:IsA("Model") and not seen[npc.Name] then
+				seen[npc.Name] = true
+				table.insert(names, npc.Name)
+			end
+		end
+	end
+	table.sort(names, function(a, b)
+		if a == "Landon" then return true end
+		if b == "Landon" then return false end
+		return a < b
+	end)
+	return names
+end
+
+AssistanceTab._npcTarget = "Landon"
+AssistanceTab.NPCDropdown = AssistanceTab:Dropdown({
+	Text = "Select NPC",
+	Options = getNPCNames(),
+	Default = "Landon",
+	Callback = function(value)
+		AssistanceTab._npcTarget = value
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Refresh NPC List",
+	Icon = "refresh-cw",
+	Callback = function()
+		local names = getNPCNames()
+		-- FIX: preserve selection if the previously-selected NPC still exists.
+		if AssistanceTab._npcTarget and not table.find(names, AssistanceTab._npcTarget) then
+			AssistanceTab._npcTarget = names[1]
+		end
+		local ok, err = pcall(function()
+			AssistanceTab.NPCDropdown:SetOptions(names)
+		end)
+		if ok then
+			Menu:Notify({ Title = "NPC List", Content = "Refreshed (" .. #names .. " NPCs).", Type = "Success", Duration = 2 })
+		else
+			Menu:Notify({ Title = "NPC List", Content = "Refresh failed: " .. tostring(err), Type = "Warning", Duration = 3 })
+		end
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Teleport to NPC",
+	Icon = "map-pin",
+	Callback = function()
+		local npcName = AssistanceTab._npcTarget or "Landon"
+		local map = workspace:FindFirstChild("Map")
+		local npcFolder = map and map:FindFirstChild("NPC")
+		if not npcFolder then
+			Menu:Notify({ Title = "NPC TP", Content = "Map.NPC folder not found.", Type = "Error" })
+			return
+		end
+
+		local npc = npcFolder:FindFirstChild(npcName)
+		if not npc then
+			Menu:Notify({ Title = "NPC TP", Content = "NPC '" .. npcName .. "' not found. Walk closer if StreamingEnabled.", Type = "Warning" })
+			return
+		end
+
+		local npcRoot = npc:FindFirstChild("HumanoidRootPart") or npc.PrimaryPart or npc:FindFirstChildWhichIsA("BasePart", true)
+		if not npcRoot or not npcRoot:IsA("BasePart") then
+			Menu:Notify({ Title = "NPC TP", Content = "NPC has no valid part to teleport to.", Type = "Error" })
+			return
+		end
+
+		local myChar = LocalPlayer.Character
+		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+		if not myRoot then
+			Menu:Notify({ Title = "NPC TP", Content = "Character not ready.", Type = "Error" })
+			return
+		end
+
+		myRoot.CFrame = CFrame.new(npcRoot.Position + Vector3.new(0, 3, 0))
+		Menu:Notify({ Title = "NPC TP", Content = "Teleported to " .. npcName .. ".", Type = "Success" })
+	end,
+})
+
+AssistanceTab:Divider()
+AssistanceTab:BoldLabel({ Text = "Plant Teleport" })
+
+AssistanceTab._plantTarget = nil
+AssistanceTab.PlantDropdown = AssistanceTab:Dropdown({
+	Text = "Select Plant",
+	Options = { "Healing Herb", "Vervain", "Wolfsbane" },
+	Default = nil,
+	Callback = function(value)
+		AssistanceTab._plantTarget = value
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Teleport to Nearest",
+	Description = "Teleports you to the closest selected plant.",
+	Icon = "flower",
+	Callback = function()
+		local plantName = AssistanceTab._plantTarget
+		if not plantName then
+			Menu:Notify({ Title = "Plant TP", Content = "No plant selected.", Type = "Warning" })
+			return
+		end
+		local map = workspace:FindFirstChild("Map")
+		local plants = map and map:FindFirstChild("Plants")
+		if not plants then
+			Menu:Notify({ Title = "Plant TP", Content = "Plants folder not found.", Type = "Error" })
+			return
+		end
+		local myChar = LocalPlayer.Character
+		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+		if not myRoot then
+			Menu:Notify({ Title = "Plant TP", Content = "Character not ready.", Type = "Error" })
+			return
+		end
+		local closest, closestDist = nil, math.huge
+		for _, obj in ipairs(plants:GetChildren()) do
+			if obj.Name == plantName and obj:IsA("BasePart") then
+				local dist = (obj.Position - myRoot.Position).Magnitude
+				if dist < closestDist then
+					closestDist = dist
+					closest = obj
+				end
+			end
+		end
+		if not closest then
+			Menu:Notify({ Title = "Plant TP", Content = "No " .. plantName .. " found.", Type = "Warning" })
+			return
+		end
+		myRoot.CFrame = CFrame.new(closest.Position + Vector3.new(0, 3, 0))
+		Menu:Notify({ Title = "Plant TP", Content = "Teleported to " .. plantName .. " (" .. math.floor(closestDist) .. " studs).", Type = "Success" })
+	end,
+})
+
+AssistanceTab:Divider()
+AssistanceTab:BoldLabel({ Text = "Auto Level Talisman" })
 
 local talismanInterval = 0.1
 
-AssistenceTab:Toggle({
+AssistanceTab:Toggle({
 	Text = "Auto TalisUpgrade",
-	Description = "Continuously fires TalisUpgrade. Warning: will cause lag and may be kicked.",
 	Default = false,
 	Callback = function(value)
 		talismanAutoEnabled = value
@@ -288,7 +452,7 @@ AssistenceTab:Toggle({
 				while talismanAutoEnabled do
 					local Events = ReplicatedStorage:FindFirstChild("Events")
 					local Quesst = Events and Events:FindFirstChild("Quesst")
-					if Quesst then
+					if Quesst and Quesst.Parent then
 						pcall(function() Quesst:FireServer("TalisUpgrade", 0) end)
 					end
 					task.wait(talismanInterval)
@@ -301,17 +465,16 @@ AssistenceTab:Toggle({
 	end,
 })
 
-AssistenceTab:Slider({
+AssistanceTab:Slider({
 	Text = "Upgrade Interval",
-	Description = "Delay between each upgrade. Lower = faster. Warning: very low values will cause lag and may be kicked.",
-	Min = 0.001, Max = 2, Step = 0.001, Default = 0.1,
+	Description = "Lower = faster upgrades (more lag), higher = slower upgrades.",
+	Min = 0.05, Max = 2, Step = 0.01, Default = 0.1,
 	Suffix = " s",
 	Callback = function(value) talismanInterval = value end,
 })
 
-AssistenceTab:Button({
-	Text = "Fire Once",
-	Description = "Fires TalisUpgrade one time.",
+AssistanceTab:Button({
+	Text = "Upgrade Once",
 	Icon = "sparkles",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
@@ -321,11 +484,10 @@ AssistenceTab:Button({
 			return
 		end
 		Quesst:FireServer("TalisUpgrade", 0)
-		Menu:Notify({ Title = "Auto Level Talisman", Content = "Fired once.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "Auto Level Talisman", Content = "Upgraded once.", Type = "Success", Duration = 2 })
 	end,
 })
 
--- VISUALS
 VisualsTab:BoldLabel({ Text = "ESP" })
 
 local SPECIES_COLORS = {
@@ -350,7 +512,7 @@ local function checkHereticPowers(player)
 	if not pd then return false end
 	for _, slot in ipairs(POWER_SLOTS) do
 		local v = pd:FindFirstChild(slot)
-		if v and string.lower(tostring(v.Value)):find("heretic", 1, true) then
+		if v and v:IsA("ValueBase") and string.lower(tostring(v.Value)):find("heretic", 1, true) then
 			return true
 		end
 	end
@@ -385,6 +547,15 @@ local SpeciesDrawings = {}
 local speciesRenderConn = nil
 local speciesMasterOn = false
 
+local speciesCache = {}
+local SPECIES_CACHE_INTERVAL = 0.5
+local speciesCacheTimer = 0
+
+local boundPlayers = {}
+local playerAddedConn = nil
+local playerRemovingConn = nil
+local characterRemovingConns = {}
+
 local function createSpeciesText(player)
 	if SpeciesDrawings[player] then return SpeciesDrawings[player] end
 	local nameLabel = Drawing.new("Text")
@@ -408,17 +579,129 @@ local function destroySpeciesText(player)
 	if not d then return end
 	for _, dr in pairs(d) do pcall(function() dr:Remove() end) end
 	SpeciesDrawings[player] = nil
+	local c = speciesCache[player]
+	if c and c.dsConn then
+		pcall(function() c.dsConn:Disconnect() end)
+	end
+	if c and c.pdConn then
+		pcall(function() c.pdConn:Disconnect() end)
+	end
+	speciesCache[player] = nil
 end
 
 local function clearAllSpeciesText()
-	for p in pairs(SpeciesDrawings) do destroySpeciesText(p) end
+	local players = {}
+	for p in pairs(SpeciesDrawings) do table.insert(players, p) end
+	for _, p in ipairs(players) do destroySpeciesText(p) end
+end
+
+local function refreshSpeciesCache(player, force)
+	local cached = speciesCache[player]
+	if cached and not force then return cached.species end
+
+	local species = getSpecies(player)
+	local entry = cached or {}
+
+	local ds = player:FindFirstChild("DataSaves")
+	if entry.ds ~= ds then
+		if entry.dsConn then pcall(function() entry.dsConn:Disconnect() end) end
+		entry.ds = ds
+		entry.dsConn = nil
+		if ds then
+			entry.dsConn = ds.DescendantAdded:Connect(function()
+				if speciesCache[player] then refreshSpeciesCache(player, true) end
+			end)
+		end
+	end
+
+	local pd = player:FindFirstChild("PowerData")
+	if entry.pd ~= pd then
+		if entry.pdConn then pcall(function() entry.pdConn:Disconnect() end) end
+		entry.pd = pd
+		entry.pdConn = nil
+		if pd then
+			entry.pdConn = pd.DescendantAdded:Connect(function()
+				if speciesCache[player] then refreshSpeciesCache(player, true) end
+			end)
+		end
+	end
+
+	entry.species = species
+	entry.t = os.clock()
+	speciesCache[player] = entry
+	return species
+end
+
+-- FIX: retry binding if DataSaves isn't replicated yet.
+local function bindDataSavesValues(player)
+	local ds = player:FindFirstChild("DataSaves")
+	if not ds then
+		local conn
+		conn = player.ChildAdded:Connect(function(c)
+			if c.Name == "DataSaves" then
+				conn:Disconnect()
+				if boundPlayers[player] then
+					bindDataSavesValues(player)
+				end
+			end
+		end)
+		return
+	end
+	for _, name in ipairs({ "Species", "Trait" }) do
+		local v = ds:FindFirstChild(name)
+		if v and v:IsA("ValueBase") then
+			v.Changed:Connect(function()
+				if speciesMasterOn and speciesCache[player] then
+					refreshSpeciesCache(player, true)
+				end
+			end)
+		end
+	end
+end
+
+local function bindPlayerForESP(player)
+	if player == LocalPlayer then return end
+	-- FIX: only spend work binding when ESP is actually on.
+	if not speciesMasterOn then return end
+	if boundPlayers[player] then
+		refreshSpeciesCache(player, true)
+		return
+	end
+	boundPlayers[player] = true
+
+	refreshSpeciesCache(player, true)
+	bindDataSavesValues(player)
+
+	local function onCharacter(char)
+		char.ChildAdded:Connect(function(child)
+			if child.Name == "Humanoid" and speciesMasterOn then
+				refreshSpeciesCache(player, true)
+			end
+		end)
+	end
+
+	if player.Character then onCharacter(player.Character) end
+	player.CharacterAdded:Connect(onCharacter)
+
+	if not characterRemovingConns[player] then
+		characterRemovingConns[player] = player.CharacterRemoving:Connect(function()
+			destroySpeciesText(player)
+		end)
+	end
 end
 
 local function startSpeciesRender()
 	if speciesRenderConn then return end
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		bindPlayerForESP(p)
+	end
+
 	speciesRenderConn = RunService.RenderStepped:Connect(function()
 		local camera = workspace.CurrentCamera
 		if not camera then return end
+
+		local toRemove = {}
 		for p in pairs(SpeciesDrawings) do
 			local valid = p.Parent
 				and p ~= LocalPlayer
@@ -428,27 +711,46 @@ local function startSpeciesRender()
 				and p.Character:FindFirstChildOfClass("Humanoid")
 				and p.Character:FindFirstChildOfClass("Humanoid").Health > 0
 			if not valid then
-				destroySpeciesText(p)
+				table.insert(toRemove, p)
 			end
 		end
+		for _, p in ipairs(toRemove) do
+			destroySpeciesText(p)
+		end
+
 		if not speciesMasterOn then return end
+
+		local now = os.clock()
+		local periodicRefresh = (now - speciesCacheTimer) >= SPECIES_CACHE_INTERVAL
+		if periodicRefresh then
+			speciesCacheTimer = now
+			for _, player in ipairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and speciesCache[player] then
+					refreshSpeciesCache(player, true)
+				end
+			end
+		end
+
 		for _, player in ipairs(Players:GetPlayers()) do
 			if player ~= LocalPlayer and player.Character then
 				local head = player.Character:FindFirstChild("Head")
 				local hum  = player.Character:FindFirstChildOfClass("Humanoid")
 				if head and hum and hum.Health > 0 then
 					local d = createSpeciesText(player)
-					local species = getSpecies(player)
+
+					local species = refreshSpeciesCache(player, not speciesCache[player])
+
 					local color = SPECIES_COLORS[species] or SPECIES_COLORS.Unknown
 					local headPos, onScreen = camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.5, 0))
 					local dist = math.floor((camera.CFrame.Position - head.Position).Magnitude + 0.5)
+
 					if onScreen then
 						d.name.Text = player.Name
 						d.name.Color = color
 						d.name.Position = Vector2.new(headPos.X, headPos.Y)
 						d.name.Visible = true
+
 						d.info.Text = string.format("%s - %dhp - %d stud", species, math.floor(hum.Health), dist)
-						d.info.Color = Color3.fromRGB(255, 255, 255)
 						d.info.Position = Vector2.new(headPos.X, headPos.Y + 16)
 						d.info.Visible = true
 					else
@@ -464,23 +766,53 @@ end
 local function stopSpeciesRender()
 	if speciesRenderConn then speciesRenderConn:Disconnect(); speciesRenderConn = nil end
 	clearAllSpeciesText()
+	for _, c in pairs(speciesCache) do
+		if c.dsConn then pcall(function() c.dsConn:Disconnect() end) end
+		if c.pdConn then pcall(function() c.pdConn:Disconnect() end) end
+	end
+	speciesCache = {}
+	boundPlayers = {}
 	speciesMasterOn = false
 end
 
-Players.PlayerAdded:Connect(function(p)
-	p.CharacterRemoving:Connect(function()
-		destroySpeciesText(p)
-	end)
+local function destroyAllESPBindings()
+	if playerAddedConn then playerAddedConn:Disconnect(); playerAddedConn = nil end
+	if playerRemovingConn then playerRemovingConn:Disconnect(); playerRemovingConn = nil end
+	for p, conn in pairs(characterRemovingConns) do
+		pcall(function() conn:Disconnect() end)
+		characterRemovingConns[p] = nil
+	end
+	boundPlayers = {}
+end
+
+playerAddedConn = Players.PlayerAdded:Connect(function(p)
+	if speciesMasterOn then
+		bindPlayerForESP(p)
+	else
+		-- still track character removal so cleanup works when ESP is later enabled
+		if not characterRemovingConns[p] then
+			characterRemovingConns[p] = p.CharacterRemoving:Connect(function()
+				destroySpeciesText(p)
+			end)
+		end
+	end
 end)
 
 for _, p in ipairs(Players:GetPlayers()) do
-	p.CharacterRemoving:Connect(function()
-		destroySpeciesText(p)
-	end)
+	if not characterRemovingConns[p] then
+		characterRemovingConns[p] = p.CharacterRemoving:Connect(function()
+			destroySpeciesText(p)
+		end)
+	end
 end
 
-Players.PlayerRemoving:Connect(function(p)
+playerRemovingConn = Players.PlayerRemoving:Connect(function(p)
 	destroySpeciesText(p)
+	if characterRemovingConns[p] then
+		pcall(function() characterRemovingConns[p]:Disconnect() end)
+		characterRemovingConns[p] = nil
+	end
+	boundPlayers[p] = nil
 end)
 
 VisualsTab:Toggle({
@@ -573,7 +905,15 @@ end
 task.spawn(function()
 	local map = workspace:WaitForChild("Map", 15)
 	local plants = map and map:WaitForChild("Plants", 15)
-	if not plants then return end
+	if not plants then
+		Menu:Notify({
+			Title = "ESP",
+			Content = "Map.Plants not found; plant ESP will be inactive.",
+			Type = "Warning",
+			Duration = 4,
+		})
+		return
+	end
 	startPlantRenderer()
 	refreshPlantSet()
 	plantChildConn = plants.ChildAdded:Connect(function(obj)
@@ -601,61 +941,6 @@ for plantName, cfg in pairs(PLANT_CONFIG) do
 	})
 end
 
--- Plant Teleport (inside Visuals, below Plants)
-VisualsTab:Divider()
-VisualsTab:BoldLabel({ Text = "Plant Teleport" })
-
-VisualsTab.PlantDropdown = VisualsTab:Dropdown({
-	Text = "Select Plant",
-	Options = { "Healing Herb", "Vervain", "Wolfsbane" },
-	Default = nil,
-	Callback = function(value)
-		VisualsTab._plantTarget = value
-	end,
-})
-
-VisualsTab:Button({
-	Text = "Teleport to Nearest",
-	Description = "Teleports you to the closest selected plant.",
-	Icon = "flower",
-	Callback = function()
-		local plantName = VisualsTab._plantTarget
-		if not plantName then
-			Menu:Notify({ Title = "Plant TP", Content = "No plant selected.", Type = "Warning" })
-			return
-		end
-		local map = workspace:FindFirstChild("Map")
-		local plants = map and map:FindFirstChild("Plants")
-		if not plants then
-			Menu:Notify({ Title = "Plant TP", Content = "Plants folder not found.", Type = "Error" })
-			return
-		end
-		local myChar = LocalPlayer.Character
-		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
-		if not myRoot then
-			Menu:Notify({ Title = "Plant TP", Content = "Character not ready.", Type = "Error" })
-			return
-		end
-		local closest, closestDist = nil, math.huge
-		for _, obj in ipairs(plants:GetChildren()) do
-			if obj.Name == plantName and obj:IsA("BasePart") then
-				local dist = (obj.Position - myRoot.Position).Magnitude
-				if dist < closestDist then
-					closestDist = dist
-					closest = obj
-				end
-			end
-		end
-		if not closest then
-			Menu:Notify({ Title = "Plant TP", Content = "No " .. plantName .. " found.", Type = "Warning" })
-			return
-		end
-		myRoot.CFrame = CFrame.new(closest.Position + Vector3.new(0, 3, 0))
-		Menu:Notify({ Title = "Plant TP", Content = "Teleported to " .. plantName .. " (" .. math.floor(closestDist) .. " studs).", Type = "Success" })
-	end,
-})
-
--- WORLD
 local function getPlayerList()
 	local list = {}
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -675,7 +960,9 @@ local flyBodyVelocity = nil
 local flyBodyGyro = nil
 local flyCharacterConn = nil
 
+-- FIX: stopFly now also disconnects flyCharacterConn.
 local function stopFly()
+	flyEnabled = false
 	if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
 	if flyBodyVelocity then flyBodyVelocity:Destroy(); flyBodyVelocity = nil end
 	if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
@@ -686,32 +973,37 @@ local function stopFly()
 end
 
 local function startFly()
-	if flyBodyVelocity or flyBodyGyro or flyConnection then
-		stopFly()
-	end
+	if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+	if flyBodyVelocity then flyBodyVelocity:Destroy(); flyBodyVelocity = nil end
+	if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
+
 	local char = LocalPlayer.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart")
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 	if not root or not humanoid then
-		Menu:Notify({ Title = "Fly", Content = "Character not ready.", Type = "Warning" })
 		return false
 	end
+
 	flyBodyVelocity = Instance.new("BodyVelocity")
 	flyBodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 	flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
 	flyBodyVelocity.Parent = root
+
 	flyBodyGyro = Instance.new("BodyGyro")
 	flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 	flyBodyGyro.P = 9e4
 	flyBodyGyro.CFrame = root.CFrame
 	flyBodyGyro.Parent = root
+
 	humanoid.PlatformStand = true
+
 	local camera = workspace.CurrentCamera
 	flyConnection = RunService.RenderStepped:Connect(function()
 		if not flyEnabled then return end
 		local c = LocalPlayer.Character
 		local r = c and c:FindFirstChild("HumanoidRootPart")
 		if not r then return end
+
 		local moveDir = Vector3.new(0, 0, 0)
 		if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
 		if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
@@ -726,12 +1018,24 @@ local function startFly()
 		flyBodyVelocity.Velocity = moveDir
 		flyBodyGyro.CFrame = camera.CFrame
 	end)
+
+	-- FIX: only create the respawn listener once and make sure it doesn't stack.
 	if not flyCharacterConn then
 		flyCharacterConn = LocalPlayer.CharacterAdded:Connect(function()
-			task.wait(0.5)
-			if flyEnabled then stopFly(); startFly() end
+			task.wait(1)
+			if not flyEnabled then return end
+			if not startFly() then
+				flyEnabled = false
+				Menu:Notify({
+					Title = "Fly",
+					Content = "Respawn failed to restart Fly. Toggle it again.",
+					Type = "Warning",
+					Duration = 3,
+				})
+			end
 		end)
 	end
+
 	return true
 end
 
@@ -740,12 +1044,13 @@ WorldTab:Toggle({
 	Description = "Fly around using WASD + Space/Ctrl.",
 	Default = false,
 	Callback = function(value)
-		flyEnabled = value
 		if value then
 			if startFly() then
+				flyEnabled = true
 				Menu:Notify({ Title = "Fly", Content = "Enabled.", Type = "Success" })
 			else
 				flyEnabled = false
+				Menu:Notify({ Title = "Fly", Content = "Character not ready.", Type = "Warning" })
 			end
 		else
 			stopFly()
@@ -767,6 +1072,7 @@ WorldTab:BoldLabel({ Text = "Speed" })
 
 local speedEnabled = false
 local speedValue = 16
+local speedOriginal = 16
 local speedConnection = nil
 
 local function applySpeed()
@@ -782,6 +1088,10 @@ WorldTab:Toggle({
 	Callback = function(value)
 		speedEnabled = value
 		if value then
+			local char = LocalPlayer.Character
+			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+			if humanoid then speedOriginal = humanoid.WalkSpeed end
+			if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
 			speedConnection = RunService.Heartbeat:Connect(function()
 				if not speedEnabled then return end
 				applySpeed()
@@ -792,7 +1102,7 @@ WorldTab:Toggle({
 			if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
 			local char = LocalPlayer.Character
 			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-			if humanoid then humanoid.WalkSpeed = 16 end
+			if humanoid then humanoid.WalkSpeed = speedOriginal end
 			Menu:Notify({ Title = "Speed", Content = "Disabled.", Type = "Info" })
 		end
 	end,
@@ -814,6 +1124,7 @@ WorldTab:BoldLabel({ Text = "Noclip" })
 
 local noclipEnabled = false
 local noclipConnection = nil
+local noclipCharacterConn = nil -- FIX: store CharacterAdded listener so it can be disconnected.
 local noclipModified = {}
 
 local function clearNoclipTracking()
@@ -825,6 +1136,17 @@ local function clearNoclipTracking()
 	noclipModified = {}
 end
 
+local function applyNoclipToCharacter()
+	local char = LocalPlayer.Character
+	if not char then return end
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") and part.CanCollide then
+			noclipModified[part] = true
+			part.CanCollide = false
+		end
+	end
+end
+
 WorldTab:Toggle({
 	Text = "Enable Noclip",
 	Description = "Walk through walls and objects.",
@@ -832,17 +1154,23 @@ WorldTab:Toggle({
 	Callback = function(value)
 		noclipEnabled = value
 		if value then
+			if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
 			noclipConnection = RunService.Stepped:Connect(function()
 				if not noclipEnabled then return end
-				local char = LocalPlayer.Character
-				if not char then return end
-				for _, part in ipairs(char:GetDescendants()) do
-					if part:IsA("BasePart") and part.CanCollide then
-						noclipModified[part] = true
-						part.CanCollide = false
-					end
-				end
+				applyNoclipToCharacter()
 			end)
+
+			-- FIX: create respawn listener only once, and only when enabling.
+			if not noclipCharacterConn then
+				noclipCharacterConn = LocalPlayer.CharacterAdded:Connect(function()
+					clearNoclipTracking()
+					if not noclipEnabled then return end
+					task.wait(0.5)
+					if not noclipEnabled then return end
+					applyNoclipToCharacter()
+				end)
+			end
+
 			Menu:Notify({ Title = "Noclip", Content = "Enabled.", Type = "Success" })
 		else
 			if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
@@ -852,30 +1180,17 @@ WorldTab:Toggle({
 	end,
 })
 
-LocalPlayer.CharacterAdded:Connect(function()
-	clearNoclipTracking()
-	if noclipEnabled then
-		task.wait(0.5)
-		local char = LocalPlayer.Character
-		if char then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.CanCollide then
-					noclipModified[part] = true
-					part.CanCollide = false
-				end
-			end
-		end
-	end
-end)
-
 WorldTab:Divider()
 WorldTab:BoldLabel({ Text = "Teleport" })
 
 local function refreshTeleportDropdown()
 	local names = getPlayerList()
-	WorldTab._teleportTarget = nil
+	-- FIX: keep the selection if the target player is still present.
+	if WorldTab._teleportTarget and not table.find(names, WorldTab._teleportTarget) then
+		WorldTab._teleportTarget = nil
+	end
 	local ok, err = pcall(function()
-		WorldTab.TeleportDropdown:SetOptions(names, nil, true)
+		WorldTab.TeleportDropdown:SetOptions(names)
 	end)
 	if not ok then
 		warn("[TVR Script] Dropdown refresh failed: " .. tostring(err))
@@ -941,6 +1256,12 @@ WorldTab:Button({
 	end,
 })
 
+Players.PlayerRemoving:Connect(function(p)
+	if WorldTab._teleportTarget and p.Name == WorldTab._teleportTarget then
+		refreshTeleportDropdown()
+	end
+end)
+
 WorldTab:Divider()
 WorldTab:BoldLabel({ Text = "Enable Infinite Yield" })
 
@@ -949,12 +1270,21 @@ WorldTab:Button({
 	Description = "Loads the Infinite Yield admin command script.",
 	Icon = "terminal",
 	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-		Menu:Notify({ Title = "Infinite Yield", Content = "Loaded! Use the command bar it opens.", Type = "Success", Duration = 4 })
+		if type(loadstring) ~= "function" then
+			Menu:Notify({ Title = "Infinite Yield", Content = "loadstring is not available in this executor.", Type = "Error", Duration = 4 })
+			return
+		end
+		local ok, err = pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+		end)
+		if ok then
+			Menu:Notify({ Title = "Infinite Yield", Content = "Loaded! Use the command bar it opens.", Type = "Success", Duration = 4 })
+		else
+			Menu:Notify({ Title = "Infinite Yield", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 4 })
+		end
 	end,
 })
 
--- INTERFACE
 InterfaceTab:BoldLabel({ Text = "Appearance" })
 
 InterfaceTab:Dropdown({
@@ -967,7 +1297,10 @@ InterfaceTab:Dropdown({
 	},
 	Default = "Violet",
 	Callback = function(value)
-		Menu:SetTheme(value)
+		local ok, err = pcall(function() Menu:SetTheme(value) end)
+		if not ok then
+			Menu:Notify({ Title = "Theme", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
+		end
 	end,
 })
 
@@ -1002,49 +1335,69 @@ InterfaceTab:Button({
 InterfaceTab:Divider()
 InterfaceTab:BoldLabel({ Text = "Danger" })
 
+local keyConn = nil -- FIX: stored so fullCleanup can disconnect it.
+
+local function fullCleanup()
+	-- FIX: idempotent — EJECT + OnDestroy would otherwise run this twice.
+	if cleanedUp then return end
+	cleanedUp = true
+
+	stopTalismanLoop()
+	pcall(stopFly)
+
+	-- FIX: reset internal flags so leaked respawn handlers can't re-enable anything.
+	speedEnabled = false
+	noclipEnabled = false
+	flyEnabled = false
+
+	if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
+	if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
+	if noclipCharacterConn then noclipCharacterConn:Disconnect(); noclipCharacterConn = nil end
+	if flyCharacterConn then flyCharacterConn:Disconnect(); flyCharacterConn = nil end
+	if keyConn then keyConn:Disconnect(); keyConn = nil end
+
+	local char = LocalPlayer.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.PlatformStand = false
+		humanoid.WalkSpeed = speedOriginal
+	end
+
+	clearNoclipTracking()
+	pcall(function() destroyAllPlantDrawings(); stopPlantRenderer() end)
+	pcall(function() stopSpeciesRender() end)
+	pcall(destroyAllESPBindings)
+
+	-- FIX: disconnect character-removal conns that were created outside ESP toggling.
+	for p, conn in pairs(characterRemovingConns) do
+		pcall(function() conn:Disconnect() end)
+		characterRemovingConns[p] = nil
+	end
+
+	if genv then genv.__ArmentaLibExample = nil end
+end
+
 InterfaceTab:Button({
 	Text = "EJECT",
 	Description = "Completely unloads the script.",
 	Icon = "power",
 	Callback = function()
-		stopTalismanLoop()
-		pcall(stopFly)
-		if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
-		local char = LocalPlayer.Character
-		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.PlatformStand = false
-			humanoid.WalkSpeed = 16
-		end
-		if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
-		clearNoclipTracking()
-		pcall(function() destroyAllPlantDrawings(); stopPlantRenderer() end)
-		pcall(function() stopSpeciesRender() end)
+		fullCleanup()
 		pcall(function() Menu:Destroy() end)
-		if getgenv then getgenv().__ArmentaLibExample = nil end
 		print("[TVR Script] Ejected.")
 	end,
 })
 
--- INPUT & CLEANUP
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+-- FIX: store the key connection so it can be released on cleanup.
+keyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.K then
 		Menu:ToggleVisibility()
 	end
 end)
 
-Menu:OnMinimizeChanged(function(minimized) end)
-
 Menu:OnDestroy(function()
-	stopTalismanLoop()
-	pcall(stopFly)
-	if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
-	if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
-	clearNoclipTracking()
-	pcall(function() destroyAllPlantDrawings(); stopPlantRenderer() end)
-	pcall(function() stopSpeciesRender() end)
-	if getgenv then getgenv().__ArmentaLibExample = nil end
+	fullCleanup()
 end)
 
 Menu:Notify({
