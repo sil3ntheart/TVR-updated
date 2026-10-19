@@ -42,16 +42,16 @@ local MoneyTab = Menu:Tab({ Text = "Money" })
 local AssistanceTab = Menu:Tab({ Text = "Assistance" })
 local VisualsTab = Menu:Tab({ Text = "Visuals" })
 local WorldTab = Menu:Tab({ Text = "World" })
-local InterfaceTab = Menu:Tab({ Text = "Interface" })
+local InterfaceTab = Menu:Tab({ Text = "Settings" })
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 
--- FIX: guard so fullCleanup only runs once even if called from both EJECT and OnDestroy.
 local cleanedUp = false
 
 local talismanAutoEnabled = false
@@ -78,7 +78,7 @@ SpinsTab:Button({
 			return
 		end
 		CharacterCreation:FireServer("Spins", -1000000)
-		Menu:Notify({ Title = "Add Spins", Content = "Spins event fired. Warning: negative spin cost is an exploit and may be flagged.", Type = "Warning", Duration = 4 })
+		Menu:Notify({ Title = "Add Spins", Content = "Spins event fired.", Type = "Warning", Duration = 4 })
 	end,
 })
 
@@ -230,7 +230,7 @@ MoneyTab:Button({
 			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
 		end)
 		if ok then
-			Menu:Notify({ Title = "Money", Content = "Fired. Warning: negative-price exploit may be flagged.", Type = "Warning", Duration = 4 })
+			Menu:Notify({ Title = "Money", Content = "Fired.", Type = "Warning", Duration = 4 })
 		else
 			Menu:Notify({ Title = "Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
 		end
@@ -290,6 +290,152 @@ AssistanceTab:Button({
 })
 
 AssistanceTab:Divider()
+AssistanceTab:BoldLabel({ Text = "Buyable Houses" })
+
+local function getBuyableRoot()
+	local map = workspace:FindFirstChild("Map")
+	return map and map:FindFirstChild("BuyableHouses")
+end
+
+local function getHouseSign(house)
+	if not house then return nil end
+	local sign = house:FindFirstChild("Sign")
+	if sign then
+		local inner = sign:FindFirstChild("Sign")
+		if inner and inner:IsA("BasePart") then return inner end
+		if sign:IsA("BasePart") then return sign end
+	end
+	for _, d in ipairs(house:GetDescendants()) do
+		if d:IsA("BasePart") then return d end
+	end
+	return nil
+end
+
+local HOUSE_LABELS = {
+	House1  = "Sheila House",
+	House2  = "Main House",
+	House3  = "Caroline House",
+	House4  = "Tylor House",
+	House5  = "Blue House",
+	House6  = "Apartment (6)",
+	House7  = "Apartment (7)",
+	House8  = "Qetsiyah House",
+	House9  = "Stake Apartment",
+	House10 = "City Apartment (10)",
+	House11 = "City Apartment (11)",
+}
+
+local function getHouseLabel(houseName)
+	return HOUSE_LABELS[houseName] or houseName
+end
+
+local function listHouseNames()
+	local names = {}
+	local root = getBuyableRoot()
+	if not root then return names end
+	for _, h in ipairs(root:GetChildren()) do
+		if h:IsA("Folder") and h.Name:match("^House%d+$") then
+			table.insert(names, h.Name)
+		end
+	end
+	table.sort(names, function(a, b)
+		return (tonumber(a:match("%d+")) or 0) < (tonumber(b:match("%d+")) or 0)
+	end)
+	return names
+end
+
+local function getHouseDisplayNames()
+	local display = {}
+	for _, realName in ipairs(listHouseNames()) do
+		table.insert(display, getHouseLabel(realName))
+	end
+	return display
+end
+
+local function displayToRealName(display)
+	if not display then return nil end
+	for realName, label in pairs(HOUSE_LABELS) do
+		if label == display then
+			return realName
+		end
+	end
+	if display:match("^House%d+$") then return display end
+	return nil
+end
+
+AssistanceTab._houseTarget = nil
+
+AssistanceTab.HouseDropdown = AssistanceTab:Dropdown({
+	Text = "Select House",
+	Options = getHouseDisplayNames(),
+	Default = nil,
+	Callback = function(value) AssistanceTab._houseTarget = value end,
+})
+
+AssistanceTab:Button({
+	Text = "Refresh House List",
+	Icon = "refresh-cw",
+	Callback = function()
+		local display = getHouseDisplayNames()
+		if #display == 0 then
+			Menu:Notify({ Title = "Houses", Content = "No houses found (Map.BuyableHouses missing).", Type = "Warning", Duration = 3 })
+			return
+		end
+		if AssistanceTab._houseTarget
+			and not table.find(display, AssistanceTab._houseTarget) then
+			AssistanceTab._houseTarget = nil
+		end
+		local ok, err = pcall(function() AssistanceTab.HouseDropdown:SetOptions(display) end)
+		if ok then
+			Menu:Notify({ Title = "Houses", Content = "Refreshed (" .. #display .. ").", Type = "Success", Duration = 2 })
+		else
+			Menu:Notify({ Title = "Houses", Content = "Refresh failed: " .. tostring(err), Type = "Warning", Duration = 3 })
+		end
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Teleport to House",
+	Description = "Teleports you in front of the selected house's sign.",
+	Icon = "home",
+	Callback = function()
+		local display = AssistanceTab._houseTarget
+		if not display then
+			Menu:Notify({ Title = "Houses", Content = "No house selected.", Type = "Warning" })
+			return
+		end
+		local houseName = displayToRealName(display)
+		if not houseName then
+			Menu:Notify({ Title = "Houses", Content = "Invalid selection.", Type = "Error" })
+			return
+		end
+		local root = getBuyableRoot()
+		local house = root and root:FindFirstChild(houseName)
+		if not house then
+			Menu:Notify({ Title = "Houses", Content = "House '" .. houseName .. "' not found.", Type = "Warning" })
+			return
+		end
+		local sign = getHouseSign(house)
+		if not sign then
+			Menu:Notify({ Title = "Houses", Content = "No sign part in " .. houseName .. ".", Type = "Error" })
+			return
+		end
+		local myChar = LocalPlayer.Character
+		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+		if not myRoot then
+			Menu:Notify({ Title = "Houses", Content = "Character not ready.", Type = "Error" })
+			return
+		end
+
+		local front = sign.CFrame.LookVector
+		local targetPos = sign.Position + front * 5 + Vector3.new(0, 3, 0)
+		myRoot.CFrame = CFrame.new(targetPos, targetPos + front)
+
+		Menu:Notify({ Title = "Houses", Content = "Teleported to " .. getHouseLabel(houseName) .. ".", Type = "Success" })
+	end,
+})
+
+AssistanceTab:Divider()
 AssistanceTab:BoldLabel({ Text = "NPC Teleport" })
 
 local function getNPCNames()
@@ -328,12 +474,15 @@ AssistanceTab:Button({
 	Icon = "refresh-cw",
 	Callback = function()
 		local names = getNPCNames()
-		-- FIX: preserve selection if the previously-selected NPC still exists.
+		if #names == 0 then
+			Menu:Notify({ Title = "NPC List", Content = "No NPCs found.", Type = "Warning", Duration = 3 })
+			return
+		end
 		if AssistanceTab._npcTarget and not table.find(names, AssistanceTab._npcTarget) then
 			AssistanceTab._npcTarget = names[1]
 		end
 		local ok, err = pcall(function()
-			AssistanceTab.NPCDropdown:SetOptions(names)
+			AssistanceTab.NPCDropdown:SetOptions(names, AssistanceTab._npcTarget)
 		end)
 		if ok then
 			Menu:Notify({ Title = "NPC List", Content = "Refreshed (" .. #names .. " NPCs).", Type = "Success", Duration = 2 })
@@ -442,6 +591,7 @@ AssistanceTab:Toggle({
 	Text = "Auto TalisUpgrade",
 	Default = false,
 	Callback = function(value)
+		if cleanedUp then return end
 		talismanAutoEnabled = value
 		if talismanThread then
 			pcall(function() task.cancel(talismanThread) end)
@@ -449,7 +599,7 @@ AssistanceTab:Toggle({
 		end
 		if value then
 			talismanThread = task.spawn(function()
-				while talismanAutoEnabled do
+				while talismanAutoEnabled and not cleanedUp do
 					local Events = ReplicatedStorage:FindFirstChild("Events")
 					local Quesst = Events and Events:FindFirstChild("Quesst")
 					if Quesst and Quesst.Parent then
@@ -458,7 +608,7 @@ AssistanceTab:Toggle({
 					task.wait(talismanInterval)
 				end
 			end)
-			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Enabled. Warning: will cause lag and may be kicked.", Type = "Warning", Duration = 4 })
+			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Enabled.", Type = "Warning", Duration = 4 })
 		else
 			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Disabled.", Type = "Info" })
 		end
@@ -502,17 +652,11 @@ local SPECIES_COLORS = {
 	Unknown   = Color3.fromRGB(200, 200, 200),
 }
 
-local POWER_SLOTS = {
-	"PowernameG","PowernameT","PowernameY","PowernameF","PowernameC",
-	"PowernameB","PowernameV","PowernameX","PowernameE","PowernameR",
-}
-
 local function checkHereticPowers(player)
 	local pd = player:FindFirstChild("PowerData")
 	if not pd then return false end
-	for _, slot in ipairs(POWER_SLOTS) do
-		local v = pd:FindFirstChild(slot)
-		if v and v:IsA("ValueBase") and string.lower(tostring(v.Value)):find("heretic", 1, true) then
+	for _, v in ipairs(pd:GetChildren()) do
+		if v:IsA("ValueBase") and string.lower(tostring(v.Value)):find("heretic", 1, true) then
 			return true
 		end
 	end
@@ -555,6 +699,7 @@ local boundPlayers = {}
 local playerAddedConn = nil
 local playerRemovingConn = nil
 local characterRemovingConns = {}
+local playerBindings = {}
 
 local function createSpeciesText(player)
 	if SpeciesDrawings[player] then return SpeciesDrawings[player] end
@@ -595,6 +740,15 @@ local function clearAllSpeciesText()
 	for _, p in ipairs(players) do destroySpeciesText(p) end
 end
 
+local function disconnectPlayerBindings(player)
+	local binds = playerBindings[player]
+	if not binds then return end
+	for _, c in ipairs(binds) do
+		pcall(function() c:Disconnect() end)
+	end
+	playerBindings[player] = nil
+end
+
 local function refreshSpeciesCache(player, force)
 	local cached = speciesCache[player]
 	if cached and not force then return cached.species end
@@ -632,7 +786,16 @@ local function refreshSpeciesCache(player, force)
 	return species
 end
 
--- FIX: retry binding if DataSaves isn't replicated yet.
+local function addPlayerBinding(player, conn)
+	local binds = playerBindings[player]
+	if not binds then
+		binds = {}
+		playerBindings[player] = binds
+	end
+	table.insert(binds, conn)
+	return conn
+end
+
 local function bindDataSavesValues(player)
 	local ds = player:FindFirstChild("DataSaves")
 	if not ds then
@@ -645,23 +808,24 @@ local function bindDataSavesValues(player)
 				end
 			end
 		end)
+		addPlayerBinding(player, conn)
 		return
 	end
 	for _, name in ipairs({ "Species", "Trait" }) do
 		local v = ds:FindFirstChild(name)
 		if v and v:IsA("ValueBase") then
-			v.Changed:Connect(function()
+			local conn = v.Changed:Connect(function()
 				if speciesMasterOn and speciesCache[player] then
 					refreshSpeciesCache(player, true)
 				end
 			end)
+			addPlayerBinding(player, conn)
 		end
 	end
 end
 
 local function bindPlayerForESP(player)
 	if player == LocalPlayer then return end
-	-- FIX: only spend work binding when ESP is actually on.
 	if not speciesMasterOn then return end
 	if boundPlayers[player] then
 		refreshSpeciesCache(player, true)
@@ -673,15 +837,17 @@ local function bindPlayerForESP(player)
 	bindDataSavesValues(player)
 
 	local function onCharacter(char)
-		char.ChildAdded:Connect(function(child)
+		local conn = char.ChildAdded:Connect(function(child)
 			if child.Name == "Humanoid" and speciesMasterOn then
 				refreshSpeciesCache(player, true)
 			end
 		end)
+		addPlayerBinding(player, conn)
 	end
 
 	if player.Character then onCharacter(player.Character) end
-	player.CharacterAdded:Connect(onCharacter)
+	local charAddedConn = player.CharacterAdded:Connect(onCharacter)
+	addPlayerBinding(player, charAddedConn)
 
 	if not characterRemovingConns[player] then
 		characterRemovingConns[player] = player.CharacterRemoving:Connect(function()
@@ -692,12 +858,14 @@ end
 
 local function startSpeciesRender()
 	if speciesRenderConn then return end
+	if cleanedUp then return end
 
 	for _, p in ipairs(Players:GetPlayers()) do
 		bindPlayerForESP(p)
 	end
 
 	speciesRenderConn = RunService.RenderStepped:Connect(function()
+		if cleanedUp then return end
 		local camera = workspace.CurrentCamera
 		if not camera then return end
 
@@ -766,6 +934,12 @@ end
 local function stopSpeciesRender()
 	if speciesRenderConn then speciesRenderConn:Disconnect(); speciesRenderConn = nil end
 	clearAllSpeciesText()
+
+	for p in pairs(playerBindings) do
+		disconnectPlayerBindings(p)
+	end
+	playerBindings = {}
+
 	for _, c in pairs(speciesCache) do
 		if c.dsConn then pcall(function() c.dsConn:Disconnect() end) end
 		if c.pdConn then pcall(function() c.pdConn:Disconnect() end) end
@@ -782,14 +956,18 @@ local function destroyAllESPBindings()
 		pcall(function() conn:Disconnect() end)
 		characterRemovingConns[p] = nil
 	end
+	for p in pairs(playerBindings) do
+		disconnectPlayerBindings(p)
+	end
+	playerBindings = {}
 	boundPlayers = {}
 end
 
 playerAddedConn = Players.PlayerAdded:Connect(function(p)
+	if cleanedUp then return end
 	if speciesMasterOn then
 		bindPlayerForESP(p)
 	else
-		-- still track character removal so cleanup works when ESP is later enabled
 		if not characterRemovingConns[p] then
 			characterRemovingConns[p] = p.CharacterRemoving:Connect(function()
 				destroySpeciesText(p)
@@ -812,6 +990,7 @@ playerRemovingConn = Players.PlayerRemoving:Connect(function(p)
 		pcall(function() characterRemovingConns[p]:Disconnect() end)
 		characterRemovingConns[p] = nil
 	end
+	disconnectPlayerBindings(p)
 	boundPlayers[p] = nil
 end)
 
@@ -820,6 +999,7 @@ VisualsTab:Toggle({
 	Description = "Shows player names colored by species with HP and distance.",
 	Default = false,
 	Callback = function(value)
+		if cleanedUp then return end
 		if value == speciesMasterOn then return end
 		speciesMasterOn = value
 		if value then startSpeciesRender() else stopSpeciesRender() end
@@ -878,7 +1058,9 @@ end
 
 local function startPlantRenderer()
 	if plantRenderConn then return end
+	if cleanedUp then return end
 	plantRenderConn = RunService.RenderStepped:Connect(function()
+		if cleanedUp then return end
 		local camera = workspace.CurrentCamera
 		if not camera then return end
 		for obj, drawings in pairs(PlantDrawings) do
@@ -904,7 +1086,9 @@ end
 
 task.spawn(function()
 	local map = workspace:WaitForChild("Map", 15)
+	if cleanedUp then return end
 	local plants = map and map:WaitForChild("Plants", 15)
+	if cleanedUp then return end
 	if not plants then
 		Menu:Notify({
 			Title = "ESP",
@@ -917,7 +1101,9 @@ task.spawn(function()
 	startPlantRenderer()
 	refreshPlantSet()
 	plantChildConn = plants.ChildAdded:Connect(function(obj)
+		if cleanedUp then return end
 		task.wait(0.1)
+		if cleanedUp then return end
 		local cfg = getPlantConfig(obj)
 		if cfg and cfg.Enabled then createPlantDrawing(obj, cfg) end
 	end)
@@ -929,6 +1115,7 @@ for plantName, cfg in pairs(PLANT_CONFIG) do
 		Description = "Highlight " .. plantName .. " plants.",
 		Default = false,
 		Callback = function(value)
+			if cleanedUp then return end
 			cfg.Enabled = value
 			refreshPlantSet()
 			Menu:Notify({
@@ -960,7 +1147,6 @@ local flyBodyVelocity = nil
 local flyBodyGyro = nil
 local flyCharacterConn = nil
 
--- FIX: stopFly now also disconnects flyCharacterConn.
 local function stopFly()
 	flyEnabled = false
 	if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
@@ -999,7 +1185,7 @@ local function startFly()
 
 	local camera = workspace.CurrentCamera
 	flyConnection = RunService.RenderStepped:Connect(function()
-		if not flyEnabled then return end
+		if not flyEnabled or cleanedUp then return end
 		local c = LocalPlayer.Character
 		local r = c and c:FindFirstChild("HumanoidRootPart")
 		if not r then return end
@@ -1019,11 +1205,10 @@ local function startFly()
 		flyBodyGyro.CFrame = camera.CFrame
 	end)
 
-	-- FIX: only create the respawn listener once and make sure it doesn't stack.
 	if not flyCharacterConn then
 		flyCharacterConn = LocalPlayer.CharacterAdded:Connect(function()
 			task.wait(1)
-			if not flyEnabled then return end
+			if not flyEnabled or cleanedUp then return end
 			if not startFly() then
 				flyEnabled = false
 				Menu:Notify({
@@ -1044,6 +1229,7 @@ WorldTab:Toggle({
 	Description = "Fly around using WASD + Space/Ctrl.",
 	Default = false,
 	Callback = function(value)
+		if cleanedUp then return end
 		if value then
 			if startFly() then
 				flyEnabled = true
@@ -1086,6 +1272,7 @@ WorldTab:Toggle({
 	Description = "Move faster than the default walkspeed.",
 	Default = false,
 	Callback = function(value)
+		if cleanedUp then return end
 		speedEnabled = value
 		if value then
 			local char = LocalPlayer.Character
@@ -1093,7 +1280,7 @@ WorldTab:Toggle({
 			if humanoid then speedOriginal = humanoid.WalkSpeed end
 			if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
 			speedConnection = RunService.Heartbeat:Connect(function()
-				if not speedEnabled then return end
+				if not speedEnabled or cleanedUp then return end
 				applySpeed()
 			end)
 			applySpeed()
@@ -1124,7 +1311,7 @@ WorldTab:BoldLabel({ Text = "Noclip" })
 
 local noclipEnabled = false
 local noclipConnection = nil
-local noclipCharacterConn = nil -- FIX: store CharacterAdded listener so it can be disconnected.
+local noclipCharacterConn = nil
 local noclipModified = {}
 
 local function clearNoclipTracking()
@@ -1152,21 +1339,21 @@ WorldTab:Toggle({
 	Description = "Walk through walls and objects.",
 	Default = false,
 	Callback = function(value)
+		if cleanedUp then return end
 		noclipEnabled = value
 		if value then
 			if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
 			noclipConnection = RunService.Stepped:Connect(function()
-				if not noclipEnabled then return end
+				if not noclipEnabled or cleanedUp then return end
 				applyNoclipToCharacter()
 			end)
 
-			-- FIX: create respawn listener only once, and only when enabling.
 			if not noclipCharacterConn then
 				noclipCharacterConn = LocalPlayer.CharacterAdded:Connect(function()
 					clearNoclipTracking()
-					if not noclipEnabled then return end
+					if not noclipEnabled or cleanedUp then return end
 					task.wait(0.5)
-					if not noclipEnabled then return end
+					if not noclipEnabled or cleanedUp then return end
 					applyNoclipToCharacter()
 				end)
 			end
@@ -1185,10 +1372,10 @@ WorldTab:BoldLabel({ Text = "Teleport" })
 
 local function refreshTeleportDropdown()
 	local names = getPlayerList()
-	-- FIX: keep the selection if the target player is still present.
 	if WorldTab._teleportTarget and not table.find(names, WorldTab._teleportTarget) then
 		WorldTab._teleportTarget = nil
 	end
+	if not WorldTab.TeleportDropdown then return end
 	local ok, err = pcall(function()
 		WorldTab.TeleportDropdown:SetOptions(names)
 	end)
@@ -1212,6 +1399,7 @@ WorldTab:Button({
 	Description = "Reloads the player list in case someone joined or left.",
 	Icon = "refresh-cw",
 	Callback = function()
+		if cleanedUp then return end
 		refreshTeleportDropdown()
 	end,
 })
@@ -1257,6 +1445,7 @@ WorldTab:Button({
 })
 
 Players.PlayerRemoving:Connect(function(p)
+	if cleanedUp then return end
 	if WorldTab._teleportTarget and p.Name == WorldTab._teleportTarget then
 		refreshTeleportDropdown()
 	end
@@ -1305,7 +1494,137 @@ InterfaceTab:Dropdown({
 })
 
 InterfaceTab:Divider()
-InterfaceTab:Label({ Text = "Press K to show or hide the window." })
+InterfaceTab:BoldLabel({ Text = "Preferred Game Settings" })
+
+local sfxState = { muted = false, savedVolumes = {} }
+local shakeState = { disabled = false, originals = nil, camShaker = nil }
+local sfxConn = nil
+
+local function disableGameSFX()
+	if sfxState.muted then return true, "already muted" end
+	sfxState.muted = true
+	sfxState.savedVolumes = {}
+
+	local function isFootstep(s)
+		local n = string.lower(s.Name)
+		return n:find("foot", 1, true)
+			or n:find("step", 1, true)
+			or n:find("walk", 1, true)
+			or n:find("run", 1, true)
+	end
+
+	local function muteSound(s)
+		if not s:IsA("Sound") then return end
+		if isFootstep(s) then return end
+		sfxState.savedVolumes[s] = s.Volume
+		pcall(function() s.Volume = 0 end)
+	end
+
+	for _, s in ipairs(SoundService:GetDescendants()) do muteSound(s) end
+	local rsEffects = ReplicatedStorage:FindFirstChild("Effects")
+	local rsAudios = rsEffects and rsEffects:FindFirstChild("Audios")
+	if rsAudios then
+		for _, s in ipairs(rsAudios:GetDescendants()) do muteSound(s) end
+	end
+	for _, s in ipairs(workspace:GetDescendants()) do
+		if s:IsA("Sound") then muteSound(s) end
+	end
+
+	sfxConn = SoundService.DescendantAdded:Connect(function(s)
+		if s:IsA("Sound") and sfxState.muted then
+			task.wait(0)
+			if isFootstep(s) then return end
+			sfxState.savedVolumes[s] = s.Volume
+			pcall(function() s.Volume = 0 end)
+		end
+	end)
+	return true, "muted (footsteps excluded)"
+end
+
+local function restoreGameSFX()
+	if not sfxState.muted then return end
+	sfxState.muted = false
+	if sfxConn then sfxConn:Disconnect(); sfxConn = nil end
+	for s, v in pairs(sfxState.savedVolumes) do
+		if s and s.Parent then
+			pcall(function() s.Volume = v end)
+		end
+	end
+	sfxState.savedVolumes = {}
+end
+
+local function disableShakes()
+	if shakeState.disabled then return true, "already disabled" end
+	local modules = ReplicatedStorage:FindFirstChild("Modules")
+	local camShaker = modules and modules:FindFirstChild("CameraShaker")
+	if not camShaker then
+		return false, "CameraShaker module not found"
+	end
+	shakeState.disabled = true
+	shakeState.camShaker = camShaker
+
+	shakeState.originals = {
+		Shake = camShaker.Shake,
+		StartShake = camShaker.StartShake,
+	}
+
+	pcall(function()
+		if type(camShaker.Shake) == "function" then camShaker.Shake = function() end end
+		if type(camShaker.StartShake) == "function" then camShaker.StartShake = function() end end
+		if type(camShaker.SetEnabled) == "function" then camShaker:SetEnabled(false) end
+		if camShaker.Enabled ~= nil then camShaker.Enabled = false end
+	end)
+	return true, "disabled"
+end
+
+local function restoreShakes()
+	if not shakeState.disabled then return end
+	shakeState.disabled = false
+	local camShaker = shakeState.camShaker
+	local originals = shakeState.originals
+	if camShaker and originals then
+		pcall(function()
+			if originals.Shake ~= nil then camShaker.Shake = originals.Shake end
+			if originals.StartShake ~= nil then camShaker.StartShake = originals.StartShake end
+			if type(camShaker.SetEnabled) == "function" then camShaker:SetEnabled(true) end
+			if camShaker.Enabled ~= nil then camShaker.Enabled = true end
+		end)
+	end
+	shakeState.camShaker = nil
+	shakeState.originals = nil
+end
+
+InterfaceTab:Button({
+	Text = "Apply My Settings",
+	Description = "Mutes background SFX (keeps footsteps) and disables camera shake.",
+	Icon = "settings",
+	Callback = function()
+		if cleanedUp then return end
+		local results = {}
+		local ok1, m1 = disableGameSFX()
+		table.insert(results, "GameSFX: " .. (ok1 and m1 or ("FAILED - " .. tostring(m1))))
+		local ok2, m2 = disableShakes()
+		table.insert(results, "Shakes: " .. (ok2 and m2 or ("FAILED - " .. tostring(m2))))
+		Menu:Notify({
+			Title = "Preferred Game Settings",
+			Content = table.concat(results, "\n"),
+			Type = (ok1 and ok2) and "Success" or "Warning",
+			Duration = 5,
+		})
+	end,
+})
+
+InterfaceTab:Button({
+	Text = "Restore Default SFX",
+	Description = "Unmutes everything that Apply My Settings muted.",
+	Icon = "rotate-ccw",
+	Callback = function()
+		if cleanedUp then return end
+		restoreGameSFX()
+		restoreShakes()
+		Menu:Notify({ Title = "Preferred Game Settings", Content = "Restored.", Type = "Info", Duration = 3 })
+	end,
+})
 
 InterfaceTab:Divider()
 InterfaceTab:BoldLabel({ Text = "Server" })
@@ -1335,17 +1654,17 @@ InterfaceTab:Button({
 InterfaceTab:Divider()
 InterfaceTab:BoldLabel({ Text = "Danger" })
 
-local keyConn = nil -- FIX: stored so fullCleanup can disconnect it.
+local keyConn = nil
 
 local function fullCleanup()
-	-- FIX: idempotent — EJECT + OnDestroy would otherwise run this twice.
 	if cleanedUp then return end
 	cleanedUp = true
 
 	stopTalismanLoop()
 	pcall(stopFly)
+	pcall(restoreGameSFX)
+	pcall(restoreShakes)
 
-	-- FIX: reset internal flags so leaked respawn handlers can't re-enable anything.
 	speedEnabled = false
 	noclipEnabled = false
 	flyEnabled = false
@@ -1354,6 +1673,7 @@ local function fullCleanup()
 	if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
 	if noclipCharacterConn then noclipCharacterConn:Disconnect(); noclipCharacterConn = nil end
 	if flyCharacterConn then flyCharacterConn:Disconnect(); flyCharacterConn = nil end
+	if sfxConn then sfxConn:Disconnect(); sfxConn = nil end
 	if keyConn then keyConn:Disconnect(); keyConn = nil end
 
 	local char = LocalPlayer.Character
@@ -1368,7 +1688,6 @@ local function fullCleanup()
 	pcall(function() stopSpeciesRender() end)
 	pcall(destroyAllESPBindings)
 
-	-- FIX: disconnect character-removal conns that were created outside ESP toggling.
 	for p, conn in pairs(characterRemovingConns) do
 		pcall(function() conn:Disconnect() end)
 		characterRemovingConns[p] = nil
@@ -1388,16 +1707,16 @@ InterfaceTab:Button({
 	end,
 })
 
--- FIX: store the key connection so it can be released on cleanup.
 keyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if cleanedUp then return end
 	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.K then
 		Menu:ToggleVisibility()
 	end
 end)
 
-Menu:OnDestroy(function()
-	fullCleanup()
+pcall(function()
+	Menu:OnDestroy(fullCleanup)
 end)
 
 Menu:Notify({
