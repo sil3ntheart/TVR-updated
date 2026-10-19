@@ -255,37 +255,122 @@ AssistanceTab:Button({
 	end,
 })
 
-AssistanceTab:Divider()
-AssistanceTab:BoldLabel({ Text = "Candle Channel" })
 AssistanceTab:Button({
-	Text = "Candle Channel",
-	Description = "Auto incendias and channels nearby candles",
+	Text = "Auto Vados",
 	Icon = "flame",
 	Callback = function()
-		local FireEvent = ReplicatedStorage.Events.Fire
-		local ChannelObjects = workspace:FindFirstChild("ChannelObjects")
-		local ChannelingEvent = ReplicatedStorage.Events.Channeling
-		local Map = workspace:FindFirstChild("Map")
-		local Buyable = Map and Map:FindFirstChild("BuyableHouses")
-		local House1 = Buyable and Buyable:FindFirstChild("House1")
-		local Folder = House1 and House1:FindFirstChild("Folder")
-		local Mesh = Folder and Folder:FindFirstChild("mesh")
-		local MeshPart = Mesh and Mesh:FindFirstChild("s4studio_mesh_3.036")
-		if not (FireEvent and ChannelObjects and ChannelingEvent and MeshPart) then
-			Menu:Notify({ Title = "Candle Channel", Content = "Required objects missing.", Type = "Error", Duration = 3 })
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Vados = Events and Events:FindFirstChild("Vados")
+		local FireSpell = Vados and Vados:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Vados", Content = "Vados.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
-		local children = ChannelObjects:GetChildren()
-		local target = children[math.min(50, #children)]
-		if not target or not target:IsA("BasePart") then
-			Menu:Notify({ Title = "Candle Channel", Content = "No target candle found.", Type = "Error", Duration = 3 })
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Vados", Content = "Vados fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Resurrection",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Resurrection = Events and Events:FindFirstChild("Resurrection")
+		if not Resurrection then
+			Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection event not found.", Type = "Error", Duration = 3 })
 			return
 		end
-		FireEvent:FireServer(Vector3.new(-863, -9.4116239547729492, 558.57769775390625), target, "Start")
-		Menu:Notify({ Title = "Assistance", Content = "Waiting 2 seconds...", Type = "Info", Duration = 2 })
-		task.wait(2)
-		ChannelingEvent:FireServer(MeshPart)
-		Menu:Notify({ Title = "Assistance", Content = "Complete.", Type = "Success", Duration = 3 })
+		local map = workspace:FindFirstChild("Map")
+		local m2 = map and map:FindFirstChild("Model2")
+		local m3 = m2 and m2:FindFirstChild("Model3")
+		local cube = m3 and m3:FindFirstChild("Cube")
+		if not cube then
+			Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection target (Map.Model2.Model3.Cube) not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		Resurrection:FireServer(cube)
+		Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Merge",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Merge = Events and Events:FindFirstChild("Merge")
+		local FireSpell = Merge and Merge:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Merge", Content = "Merge.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Merge", Content = "Merge fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto EndChannel",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local EndChannel = Events and Events:FindFirstChild("EndChannel")
+		local FireSpell = EndChannel and EndChannel:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto EndChannel", Content = "EndChannel.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto EndChannel", Content = "EndChannel fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Linking",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Linking = Events and Events:FindFirstChild("Linking")
+		local FireSpell = Linking and Linking:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Linking", Content = "Linking.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Linking", Content = "Linking fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Veil Lifting",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local VeilLifting = Events and Events:FindFirstChild("VeilLifting")
+		local FireSpell = VeilLifting and VeilLifting:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Veil Lifting", Content = "VeilLifting.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Veil Lifting", Content = "Veil Lifting fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto UnLinking",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local UnLinking = Events and Events:FindFirstChild("UnLinking")
+		local FireSpell = UnLinking and UnLinking:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto UnLinking", Content = "UnLinking.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto UnLinking", Content = "UnLinking fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
@@ -1505,17 +1590,8 @@ local function disableGameSFX()
 	sfxState.muted = true
 	sfxState.savedVolumes = {}
 
-	local function isFootstep(s)
-		local n = string.lower(s.Name)
-		return n:find("foot", 1, true)
-			or n:find("step", 1, true)
-			or n:find("walk", 1, true)
-			or n:find("run", 1, true)
-	end
-
 	local function muteSound(s)
 		if not s:IsA("Sound") then return end
-		if isFootstep(s) then return end
 		sfxState.savedVolumes[s] = s.Volume
 		pcall(function() s.Volume = 0 end)
 	end
@@ -1533,12 +1609,11 @@ local function disableGameSFX()
 	sfxConn = SoundService.DescendantAdded:Connect(function(s)
 		if s:IsA("Sound") and sfxState.muted then
 			task.wait(0)
-			if isFootstep(s) then return end
 			sfxState.savedVolumes[s] = s.Volume
 			pcall(function() s.Volume = 0 end)
 		end
 	end)
-	return true, "muted (footsteps excluded)"
+	return true, "muted"
 end
 
 local function restoreGameSFX()
@@ -1596,7 +1671,7 @@ end
 
 InterfaceTab:Button({
 	Text = "Apply My Settings",
-	Description = "Mutes background SFX (keeps footsteps) and disables camera shake.",
+	Description = "Mutes background SFX and disables camera shake.",
 	Icon = "settings",
 	Callback = function()
 		if cleanedUp then return end
