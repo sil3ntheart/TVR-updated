@@ -256,6 +256,70 @@ AssistanceTab:Button({
 })
 
 AssistanceTab:Button({
+	Text = "Auto FireCircle",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local FireCircle = Events and Events:FindFirstChild("FireCircle")
+		local FireSpell = FireCircle and FireCircle:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto FireCircle", Content = "FireCircle.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto FireCircle", Content = "FireCircle fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Astral Projection",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Astral = Events and Events:FindFirstChild("Astral")
+		local FireSpell = Astral and Astral:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Astral Projection", Content = "Astral.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Astral Projection", Content = "Astral fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Suctus Incendia",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Exstinquish = Events and Events:FindFirstChild("Exstinquish")
+		local FireSpell = Exstinquish and Exstinquish:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Suctus Incendia", Content = "Exstinquish.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Suctus Incendia", Content = "Exstinquish fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
+	Text = "Auto Delfan",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Delfan = Events and Events:FindFirstChild("Delfan")
+		local FireSpell = Delfan and Delfan:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Auto Delfan", Content = "Delfan.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Auto Delfan", Content = "Delfan fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+AssistanceTab:Button({
 	Text = "Auto Vados",
 	Icon = "flame",
 	Callback = function()
@@ -1095,9 +1159,10 @@ VisualsTab:Divider()
 VisualsTab:BoldLabel({ Text = "Plants" })
 
 local PLANT_CONFIG = {
-	["Healing Herb"] = { Color = Color3.fromRGB(0, 255, 120),   Label = "Healing Herb", Enabled = false },
-	["Vervain"]      = { Color = Color3.fromRGB(255, 80, 200),  Label = "Vervain",      Enabled = false },
-	["Wolfsbane"]    = { Color = Color3.fromRGB(180, 120, 255), Label = "Wolfsbane",    Enabled = false },
+	["Healing Herb"]  = { Color = Color3.fromRGB(0, 255, 120),   Label = "Healing Herb",  Enabled = false },
+	["Vervain"]       = { Color = Color3.fromRGB(255, 80, 200),  Label = "Vervain",       Enabled = false },
+	["Wolfsbane"]     = { Color = Color3.fromRGB(180, 120, 255), Label = "Wolfsbane",     Enabled = false },
+	["Blue Calamus"]  = { Color = Color3.fromRGB(80, 160, 255),  Label = "Blue Calamus",  Enabled = false },
 }
 
 local PlantDrawings = {}
