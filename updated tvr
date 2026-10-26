@@ -1844,10 +1844,16 @@ end
 local function disableShakes()
 	if shakeState.disabled then return true, "already disabled" end
 	local modules = ReplicatedStorage:FindFirstChild("Modules")
-	local camShaker = modules and modules:FindFirstChild("CameraShaker")
-	if not camShaker then
+	local camShakerModule = modules and modules:FindFirstChild("CameraShaker")
+	if not camShakerModule then
 		return false, "CameraShaker module not found"
 	end
+
+	local ok, camShaker = pcall(require, camShakerModule)
+	if not ok or type(camShaker) ~= "table" then
+		return false, "CameraShaker module could not be required"
+	end
+
 	shakeState.disabled = true
 	shakeState.camShaker = camShaker
 
