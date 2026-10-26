@@ -38,10 +38,9 @@ end
 
 local SpinsTab = Menu:Tab({ Text = "Spins" })
 local ShopTab = Menu:Tab({ Text = "Shop" })
-local MoneyTab = Menu:Tab({ Text = "Money" })
-local AssistanceTab = Menu:Tab({ Text = "Assistance" })
-local VisualsTab = Menu:Tab({ Text = "Visuals" })
-local WorldTab = Menu:Tab({ Text = "World" })
+local AssistanceTab = Menu:Tab({ Text = "Gameplay" })
+local VisualsTab = Menu:Tab({ Text = "ESP" })
+local WorldTab = Menu:Tab({ Text = "Exploits" })
 local InterfaceTab = Menu:Tab({ Text = "Settings" })
 
 local Players = game:GetService("Players")
@@ -189,6 +188,24 @@ SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
 	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
+ShopTab:BoldLabel({ Text = "Generated Money" })
+ShopTab:Button({
+	Text = "Generated Money",
+	Description = "Generates money",
+	Icon = "dollar-sign",
+	Callback = function()
+		local ok, err = pcall(function()
+			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+		end)
+		if ok then
+			Menu:Notify({ Title = "Generated Money", Content = "Fired.", Type = "Warning", Duration = 4 })
+		else
+			Menu:Notify({ Title = "Generated Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
+		end
+	end,
+})
+
+ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Stake Shop" })
 local function buyWeapon(name)
 	ReplicatedStorage.Events.Shops:FireServer("Weapon", name, 0)
@@ -224,209 +241,187 @@ ShopTab:Button({ Text = "Death Note", Callback = function() buyGrimoire("Mystica
 ShopTab:Button({ Text = "Valentine", Callback = function() buyGrimoire("Valentine") end })
 ShopTab:Button({ Text = "The Book of Shadows", Callback = function() buyGrimoire("Bos") end })
 
-MoneyTab:BoldLabel({ Text = "Money Methods" })
-MoneyTab:Button({
-	Text = "Money",
-	Description = "generates you money",
-	Icon = "dollar-sign",
-	Callback = function()
-		local ok, err = pcall(function()
-			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
-		end)
-		if ok then
-			Menu:Notify({ Title = "Money", Content = "Fired.", Type = "Warning", Duration = 4 })
-		else
-			Menu:Notify({ Title = "Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
-		end
-	end,
-})
-
 AssistanceTab:BoldLabel({ Text = "Auto Spells" })
 
+-- 1. Incendia
 AssistanceTab:Button({
-	Text = "Auto Incendia",
+	Text = "Incendia",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local Fire = Events and Events:FindFirstChild("Fire")
 		local FireSpell = Fire and Fire:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto Incendia", Content = "FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Incendia", Content = "FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Incendia", Content = "Incendia fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "Incendia", Content = "Incendia fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 2. FireCircle
 AssistanceTab:Button({
-	Text = "Auto Mass Pain",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local MassPain = Events and Events:FindFirstChild("MassPain")
-		local FireSpell = MassPain and MassPain:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Mass Pain", Content = "MassPain.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer("Regular")
-		Menu:Notify({ Title = "Auto Mass Pain", Content = "MassPain fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Ring Spell",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local RingSpell = Events and Events:FindFirstChild("RingSpell")
-		local FireSpell = RingSpell and RingSpell:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Ring Spell", Content = "RingSpell.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer("Regular")
-		Menu:Notify({ Title = "Auto Ring Spell", Content = "RingSpell fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Ring Disabling",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local RingDisabling = Events and Events:FindFirstChild("RingDisabling")
-		local FireSpell = RingDisabling and RingDisabling:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Ring Disabling", Content = "RingDisabling.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer("Regular")
-		Menu:Notify({ Title = "Auto Ring Disabling", Content = "RingDisabling fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Surgere",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Surgere = Events and Events:FindFirstChild("Surgere")
-		local FireSpell = Surgere and Surgere:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Surgere", Content = "Surgere.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer("Regular")
-		Menu:Notify({ Title = "Auto Surgere", Content = "Surgere fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Somnus",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Somnus = Events and Events:FindFirstChild("Somnus")
-		local FireSpell = Somnus and Somnus:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Somnus", Content = "Somnus.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer("Regular")
-		Menu:Notify({ Title = "Auto Somnus", Content = "Somnus fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto FireCircle",
+	Text = "FireCircle",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local FireCircle = Events and Events:FindFirstChild("FireCircle")
 		local FireSpell = FireCircle and FireCircle:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto FireCircle", Content = "FireCircle.FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "FireCircle", Content = "FireCircle.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto FireCircle", Content = "FireCircle fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "FireCircle", Content = "FireCircle fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 3. Mass Pain
 AssistanceTab:Button({
-	Text = "Auto Astral Projection",
+	Text = "Mass Pain",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Astral = Events and Events:FindFirstChild("Astral")
-		local FireSpell = Astral and Astral:FindFirstChild("FireSpell")
+		local MassPain = Events and Events:FindFirstChild("MassPain")
+		local FireSpell = MassPain and MassPain:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto Astral Projection", Content = "Astral.FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Mass Pain", Content = "MassPain.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Astral Projection", Content = "Astral fired.", Type = "Success", Duration = 2 })
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Mass Pain", Content = "MassPain fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 4. Vados
 AssistanceTab:Button({
-	Text = "Auto Suctus Incendia",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Exstinquish = Events and Events:FindFirstChild("Exstinquish")
-		local FireSpell = Exstinquish and Exstinquish:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Suctus Incendia", Content = "Exstinquish.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Suctus Incendia", Content = "Exstinquish fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Delfan",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Delfan = Events and Events:FindFirstChild("Delfan")
-		local FireSpell = Delfan and Delfan:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Delfan", Content = "Delfan.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Delfan", Content = "Delfan fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Vados",
+	Text = "Vados",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local Vados = Events and Events:FindFirstChild("Vados")
 		local FireSpell = Vados and Vados:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto Vados", Content = "Vados.FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Vados", Content = "Vados.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Vados", Content = "Vados fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "Vados", Content = "Vados fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 5. Somnus
 AssistanceTab:Button({
-	Text = "Auto Resurrection",
+	Text = "Somnus",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Somnus = Events and Events:FindFirstChild("Somnus")
+		local FireSpell = Somnus and Somnus:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Somnus", Content = "Somnus.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Somnus", Content = "Somnus fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 6. Delfan
+AssistanceTab:Button({
+	Text = "Delfan",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Delfan = Events and Events:FindFirstChild("Delfan")
+		local FireSpell = Delfan and Delfan:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Delfan", Content = "Delfan.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Delfan", Content = "Delfan fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 7. Resist Spell
+AssistanceTab:Button({
+	Text = "Resist Spell",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local ResistSpell = Events and Events:FindFirstChild("ResistSpell")
+		local FireSpell = ResistSpell and ResistSpell:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Resist Spell", Content = "ResistSpell.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Resist Spell", Content = "ResistSpell fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 8. Heart Stopping
+AssistanceTab:Button({
+	Text = "Heart Stopping",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local HeartStopping = Events and Events:FindFirstChild("HeartStopping")
+		local FireSpell = HeartStopping and HeartStopping:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Heart Stopping", Content = "HeartStopping.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Heart Stopping", Content = "HeartStopping fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 9. Astral Projection
+AssistanceTab:Button({
+	Text = "Astral Projection",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Astral = Events and Events:FindFirstChild("Astral")
+		local FireSpell = Astral and Astral:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Astral Projection", Content = "Astral.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Astral Projection", Content = "Astral fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 10. Preservation
+AssistanceTab:Button({
+	Text = "Preservation",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Preservation = Events and Events:FindFirstChild("Preservation")
+		local FireSpell = Preservation and Preservation:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Preservation", Content = "Preservation.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Preservation", Content = "Preservation fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 11. Resurrection
+AssistanceTab:Button({
+	Text = "Resurrection",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local Resurrection = Events and Events:FindFirstChild("Resurrection")
 		if not Resurrection then
-			Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Resurrection", Content = "Resurrection event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		local map = workspace:FindFirstChild("Map")
@@ -434,91 +429,164 @@ AssistanceTab:Button({
 		local m3 = m2 and m2:FindFirstChild("Model3")
 		local cube = m3 and m3:FindFirstChild("Cube")
 		if not cube then
-			Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection target (Map.Model2.Model3.Cube) not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Resurrection", Content = "Resurrection target (Map.Model2.Model3.Cube) not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		Resurrection:FireServer(cube)
-		Menu:Notify({ Title = "Auto Resurrection", Content = "Resurrection fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "Resurrection", Content = "Resurrection fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 12. Linking
 AssistanceTab:Button({
-	Text = "Auto Merge",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Merge = Events and Events:FindFirstChild("Merge")
-		local FireSpell = Merge and Merge:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Merge", Content = "Merge.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Merge", Content = "Merge fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto EndChannel",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local EndChannel = Events and Events:FindFirstChild("EndChannel")
-		local FireSpell = EndChannel and EndChannel:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto EndChannel", Content = "EndChannel.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto EndChannel", Content = "EndChannel fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto Linking",
+	Text = "Linking",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local Linking = Events and Events:FindFirstChild("Linking")
 		local FireSpell = Linking and Linking:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto Linking", Content = "Linking.FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "Linking", Content = "Linking.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Linking", Content = "Linking fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "Linking", Content = "Linking fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
+-- 13. UnLinking
 AssistanceTab:Button({
-	Text = "Auto Veil Lifting",
-	Icon = "flame",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local VeilLifting = Events and Events:FindFirstChild("VeilLifting")
-		local FireSpell = VeilLifting and VeilLifting:FindFirstChild("FireSpell")
-		if not FireSpell then
-			Menu:Notify({ Title = "Auto Veil Lifting", Content = "VeilLifting.FireSpell event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto Veil Lifting", Content = "Veil Lifting fired.", Type = "Success", Duration = 2 })
-	end,
-})
-
-AssistanceTab:Button({
-	Text = "Auto UnLinking",
+	Text = "UnLinking",
 	Icon = "flame",
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local UnLinking = Events and Events:FindFirstChild("UnLinking")
 		local FireSpell = UnLinking and UnLinking:FindFirstChild("FireSpell")
 		if not FireSpell then
-			Menu:Notify({ Title = "Auto UnLinking", Content = "UnLinking.FireSpell event not found.", Type = "Error", Duration = 3 })
+			Menu:Notify({ Title = "UnLinking", Content = "UnLinking.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
 		FireSpell:FireServer()
-		Menu:Notify({ Title = "Auto UnLinking", Content = "UnLinking fired.", Type = "Success", Duration = 2 })
+		Menu:Notify({ Title = "UnLinking", Content = "UnLinking fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 14. EndChannel
+AssistanceTab:Button({
+	Text = "EndChannel",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local EndChannel = Events and Events:FindFirstChild("EndChannel")
+		local FireSpell = EndChannel and EndChannel:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "EndChannel", Content = "EndChannel.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "EndChannel", Content = "EndChannel fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 15. Merge
+AssistanceTab:Button({
+	Text = "Merge",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Merge = Events and Events:FindFirstChild("Merge")
+		local FireSpell = Merge and Merge:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Merge", Content = "Merge.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Merge", Content = "Merge fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 16. Veil Lifting
+AssistanceTab:Button({
+	Text = "Veil Lifting",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local VeilLifting = Events and Events:FindFirstChild("VeilLifting")
+		local FireSpell = VeilLifting and VeilLifting:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Veil Lifting", Content = "VeilLifting.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Veil Lifting", Content = "Veil Lifting fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 17. Surgere
+AssistanceTab:Button({
+	Text = "Surgere",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Surgere = Events and Events:FindFirstChild("Surgere")
+		local FireSpell = Surgere and Surgere:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Surgere", Content = "Surgere.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Surgere", Content = "Surgere fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 18. Ring Spell
+AssistanceTab:Button({
+	Text = "Ring Spell",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local RingSpell = Events and Events:FindFirstChild("RingSpell")
+		local FireSpell = RingSpell and RingSpell:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Ring Spell", Content = "RingSpell.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Ring Spell", Content = "RingSpell fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 19. Ring Disabling
+AssistanceTab:Button({
+	Text = "Ring Disabling",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local RingDisabling = Events and Events:FindFirstChild("RingDisabling")
+		local FireSpell = RingDisabling and RingDisabling:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Ring Disabling", Content = "RingDisabling.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Ring Disabling", Content = "RingDisabling fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 20. Suctus Incendia
+AssistanceTab:Button({
+	Text = "Suctus Incendia",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Exstinquish = Events and Events:FindFirstChild("Exstinquish")
+		local FireSpell = Exstinquish and Exstinquish:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Suctus Incendia", Content = "Exstinquish.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer()
+		Menu:Notify({ Title = "Suctus Incendia", Content = "Exstinquish fired.", Type = "Success", Duration = 2 })
 	end,
 })
 
@@ -550,12 +618,12 @@ local HOUSE_LABELS = {
 	House3  = "Caroline House",
 	House4  = "Tylor House",
 	House5  = "Blue House",
-	House6  = "Apartment (6)",
-	House7  = "Apartment (7)",
+	House6  = "Suburb Apartment (6)",
+	House7  = "Suburb Apartment (7)",
 	House8  = "Qetsiyah House",
 	House9  = "Stake Apartment",
-	House10 = "City Apartment (10)",
-	House11 = "City Apartment (11)",
+	House10 = "In City (10)",
+	House11 = "In City (11)",
 }
 
 local function getHouseLabel(houseName)
@@ -672,23 +740,15 @@ AssistanceTab:Divider()
 AssistanceTab:BoldLabel({ Text = "NPC Teleport" })
 
 local function getNPCNames()
-	local names = { "Landon" }
-	local seen = { Landon = true }
-	local map = workspace:FindFirstChild("Map")
-	local folder = map and map:FindFirstChild("NPC")
-	if folder then
-		for _, npc in ipairs(folder:GetChildren()) do
-			if npc:IsA("Model") and not seen[npc.Name] then
-				seen[npc.Name] = true
-				table.insert(names, npc.Name)
-			end
-		end
-	end
-	table.sort(names, function(a, b)
-		if a == "Landon" then return true end
-		if b == "Landon" then return false end
-		return a < b
-	end)
+	local names = {
+		-- Pinned at top
+		"Landon",
+		"Bastianna",
+		-- Everyone else, alphabetical
+		"Abby", "Alissa", "April", "Arthur", "Caterina", "Damon", "Emilia",
+		"Enzo", "Jane", "Kelly Beach", "Kyle", "Lana", "Marcel", "Marlon",
+		"Monique", "Morana", "Sandra", "Sarah", "Sophie", "Steve", "Tabatha",
+	}
 	return names
 end
 
@@ -730,14 +790,18 @@ AssistanceTab:Button({
 	Icon = "map-pin",
 	Callback = function()
 		local npcName = AssistanceTab._npcTarget or "Landon"
-		local map = workspace:FindFirstChild("Map")
-		local npcFolder = map and map:FindFirstChild("NPC")
-		if not npcFolder then
-			Menu:Notify({ Title = "NPC TP", Content = "Map.NPC folder not found.", Type = "Error" })
-			return
+
+		local function findNPC(name)
+			local map = workspace:FindFirstChild("Map")
+			if not map then return nil end
+			local npcFolder = map:FindFirstChild("NPC")
+			local hit = npcFolder and npcFolder:FindFirstChild(name)
+			if hit then return hit end
+			local spirit = map:FindFirstChild("SpiritWorld")
+			return spirit and spirit:FindFirstChild(name)
 		end
 
-		local npc = npcFolder:FindFirstChild(npcName)
+		local npc = findNPC(npcName)
 		if not npc then
 			Menu:Notify({ Title = "NPC TP", Content = "NPC '" .. npcName .. "' not found. Walk closer if StreamingEnabled.", Type = "Warning" })
 			return
