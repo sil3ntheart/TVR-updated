@@ -53,17 +53,6 @@ local LocalPlayer = Players.LocalPlayer
 
 local cleanedUp = false
 
-local talismanAutoEnabled = false
-local talismanThread = nil
-
-local function stopTalismanLoop()
-	talismanAutoEnabled = false
-	if talismanThread then
-		pcall(function() task.cancel(talismanThread) end)
-		talismanThread = nil
-	end
-end
-
 SpinsTab:BoldLabel({ Text = "Add Spins" })
 SpinsTab:Button({
 	Text = "Add Spins",
@@ -188,24 +177,6 @@ SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
 	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
-ShopTab:BoldLabel({ Text = "Generated Money" })
-ShopTab:Button({
-	Text = "Generated Money",
-	Description = "Generates money",
-	Icon = "dollar-sign",
-	Callback = function()
-		local ok, err = pcall(function()
-			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
-		end)
-		if ok then
-			Menu:Notify({ Title = "Generated Money", Content = "Fired.", Type = "Warning", Duration = 4 })
-		else
-			Menu:Notify({ Title = "Generated Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
-		end
-	end,
-})
-
-ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Stake Shop" })
 local function buyWeapon(name)
 	ReplicatedStorage.Events.Shops:FireServer("Weapon", name, 0)
@@ -781,8 +752,7 @@ AssistanceTab:Button({
 			Menu:Notify({ Title = "NPC List", Content = "Refreshed (" .. #names .. " NPCs).", Type = "Success", Duration = 2 })
 		else
 			Menu:Notify({ Title = "NPC List", Content = "Refresh failed: " .. tostring(err), Type = "Warning", Duration = 3 })
-		end
-	end,
+		end	end,
 })
 
 AssistanceTab:Button({
@@ -876,62 +846,6 @@ AssistanceTab:Button({
 		end
 		myRoot.CFrame = CFrame.new(closest.Position + Vector3.new(0, 3, 0))
 		Menu:Notify({ Title = "Plant TP", Content = "Teleported to " .. plantName .. " (" .. math.floor(closestDist) .. " studs).", Type = "Success" })
-	end,
-})
-
-AssistanceTab:Divider()
-AssistanceTab:BoldLabel({ Text = "Auto Level Talisman" })
-
-local talismanInterval = 0.1
-
-AssistanceTab:Toggle({
-	Text = "Auto TalisUpgrade",
-	Default = false,
-	Callback = function(value)
-		if cleanedUp then return end
-		talismanAutoEnabled = value
-		if talismanThread then
-			pcall(function() task.cancel(talismanThread) end)
-			talismanThread = nil
-		end
-		if value then
-			talismanThread = task.spawn(function()
-				while talismanAutoEnabled and not cleanedUp do
-					local Events = ReplicatedStorage:FindFirstChild("Events")
-					local Quesst = Events and Events:FindFirstChild("Quesst")
-					if Quesst and Quesst.Parent then
-						pcall(function() Quesst:FireServer("TalisUpgrade", 0) end)
-					end
-					task.wait(talismanInterval)
-				end
-			end)
-			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Enabled.", Type = "Warning", Duration = 4 })
-		else
-			Menu:Notify({ Title = "Auto TalisUpgrade", Content = "Disabled.", Type = "Info" })
-		end
-	end,
-})
-
-AssistanceTab:Slider({
-	Text = "Upgrade Interval",
-	Description = "Lower = faster upgrades (more lag), higher = slower upgrades.",
-	Min = 0.05, Max = 2, Step = 0.01, Default = 0.1,
-	Suffix = " s",
-	Callback = function(value) talismanInterval = value end,
-})
-
-AssistanceTab:Button({
-	Text = "Upgrade Once",
-	Icon = "sparkles",
-	Callback = function()
-		local Events = ReplicatedStorage:FindFirstChild("Events")
-		local Quesst = Events and Events:FindFirstChild("Quesst")
-		if not Quesst then
-			Menu:Notify({ Title = "Auto Level Talisman", Content = "Quesst event not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		Quesst:FireServer("TalisUpgrade", 0)
-		Menu:Notify({ Title = "Auto Level Talisman", Content = "Upgraded once.", Type = "Success", Duration = 2 })
 	end,
 })
 
@@ -1954,7 +1868,6 @@ local function fullCleanup()
 	if cleanedUp then return end
 	cleanedUp = true
 
-	stopTalismanLoop()
 	pcall(stopFly)
 	pcall(restoreGameSFX)
 	pcall(restoreShakes)
