@@ -177,6 +177,24 @@ SpinsTab:Button({ Text = "Vervain Taker", Callback = function()
 	Menu:Notify({ Title = "Trait", Content = "Reset and spawn in to apply.", Type = "Info", Duration = 4 })
 end })
 
+ShopTab:BoldLabel({ Text = "Generated Money" })
+ShopTab:Button({
+	Text = "Generated Money",
+	Description = "Generates money",
+	Icon = "dollar-sign",
+	Callback = function()
+		local ok, err = pcall(function()
+			ReplicatedStorage.Events.Shops:FireServer("Weapon", "Shotgun", -5000000000)
+		end)
+		if ok then
+			Menu:Notify({ Title = "Generated Money", Content = "Fired.", Type = "Warning", Duration = 4 })
+		else
+			Menu:Notify({ Title = "Generated Money", Content = "Failed: " .. tostring(err), Type = "Error", Duration = 3 })
+		end
+	end,
+})
+
+ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Stake Shop" })
 local function buyWeapon(name)
 	ReplicatedStorage.Events.Shops:FireServer("Weapon", name, 0)
@@ -248,7 +266,24 @@ AssistanceTab:Button({
 	end,
 })
 
--- 3. Mass Pain
+-- 3. OgKilling
+AssistanceTab:Button({
+	Text = "OgKilling",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local OgKilling = Events and Events:FindFirstChild("OgKilling")
+		local FireSpell = OgKilling and OgKilling:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "OgKilling", Content = "OgKilling.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "OgKilling", Content = "OgKilling fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 4. Mass Pain
 AssistanceTab:Button({
 	Text = "Mass Pain",
 	Icon = "flame",
@@ -265,7 +300,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 4. Vados
+-- 5. Vados
 AssistanceTab:Button({
 	Text = "Vados",
 	Icon = "flame",
@@ -282,7 +317,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 5. Somnus
+-- 6. Somnus
 AssistanceTab:Button({
 	Text = "Somnus",
 	Icon = "flame",
@@ -299,7 +334,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 6. Delfan
+-- 7. Delfan
 AssistanceTab:Button({
 	Text = "Delfan",
 	Icon = "flame",
@@ -316,7 +351,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 7. Resist Spell
+-- 8. Resist Spell
 AssistanceTab:Button({
 	Text = "Resist Spell",
 	Icon = "flame",
@@ -333,7 +368,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 8. Heart Stopping
+-- 9. Heart Stopping
 AssistanceTab:Button({
 	Text = "Heart Stopping",
 	Icon = "flame",
@@ -350,7 +385,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 9. Astral Projection
+-- 10. Astral Projection
 AssistanceTab:Button({
 	Text = "Astral Projection",
 	Icon = "flame",
@@ -367,7 +402,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 10. Preservation
+-- 11. Preservation
 AssistanceTab:Button({
 	Text = "Preservation",
 	Icon = "flame",
@@ -384,7 +419,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 11. Resurrection
+-- 12. Resurrection
 AssistanceTab:Button({
 	Text = "Resurrection",
 	Icon = "flame",
@@ -408,7 +443,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 12. Linking
+-- 13. Linking
 AssistanceTab:Button({
 	Text = "Linking",
 	Icon = "flame",
@@ -425,7 +460,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 13. UnLinking
+-- 14. UnLinking
 AssistanceTab:Button({
 	Text = "UnLinking",
 	Icon = "flame",
@@ -442,7 +477,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 14. EndChannel
+-- 15. EndChannel
 AssistanceTab:Button({
 	Text = "EndChannel",
 	Icon = "flame",
@@ -459,7 +494,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 15. Merge
+-- 16. Merge
 AssistanceTab:Button({
 	Text = "Merge",
 	Icon = "flame",
@@ -476,7 +511,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 16. Veil Lifting
+-- 17. Veil Lifting
 AssistanceTab:Button({
 	Text = "Veil Lifting",
 	Icon = "flame",
@@ -493,7 +528,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 17. Surgere
+-- 18. Surgere
 AssistanceTab:Button({
 	Text = "Surgere",
 	Icon = "flame",
@@ -510,7 +545,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 18. Ring Spell
+-- 19. Ring Spell
 AssistanceTab:Button({
 	Text = "Ring Spell",
 	Icon = "flame",
@@ -527,7 +562,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 19. Ring Disabling
+-- 20. Ring Disabling
 AssistanceTab:Button({
 	Text = "Ring Disabling",
 	Icon = "flame",
@@ -544,7 +579,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 20. Suctus Incendia
+-- 21. Suctus Incendia
 AssistanceTab:Button({
 	Text = "Suctus Incendia",
 	Icon = "flame",
@@ -752,7 +787,8 @@ AssistanceTab:Button({
 			Menu:Notify({ Title = "NPC List", Content = "Refreshed (" .. #names .. " NPCs).", Type = "Success", Duration = 2 })
 		else
 			Menu:Notify({ Title = "NPC List", Content = "Refresh failed: " .. tostring(err), Type = "Warning", Duration = 3 })
-		end	end,
+		end
+	end,
 })
 
 AssistanceTab:Button({
