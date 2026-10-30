@@ -207,6 +207,17 @@ ShopTab:Button({ Text = "Shotgun", Callback = function() buyWeapon("Shotgun") en
 ShopTab:Button({ Text = "Vervain Grenade", Callback = function() buyWeapon("Vervain Grenade") end })
 ShopTab:Button({ Text = "Wolfsbane Grenade", Callback = function() buyWeapon("Wolfsbane Grenade") end })
 
+-- Misc items (free)
+ShopTab:Button({ Text = "Blood Bag", Callback = function() buyWeapon("Blood Bag") end })
+ShopTab:Button({ Text = "Bowl", Callback = function() buyWeapon("Bowl") end })
+ShopTab:Button({ Text = "Candle", Callback = function() buyWeapon("Candle") end })
+ShopTab:Button({ Text = "Heart", Callback = function() buyWeapon("Heart") end })
+ShopTab:Button({ Text = "Moon Stone", Callback = function() buyWeapon("Moon Stone") end })
+ShopTab:Button({ Text = "White Oak Ash", Callback = function() buyWeapon("White Oak Ash") end })
+ShopTab:Button({ Text = "Salt", Callback = function() buyWeapon("Salt") end })
+ShopTab:Button({ Text = "Pestle", Callback = function() buyWeapon("Pestle") end })
+ShopTab:Button({ Text = "Locator Map", Callback = function() buyWeapon("Locator Map") end })
+
 ShopTab:Divider()
 ShopTab:BoldLabel({ Text = "Talisman" })
 local function buyTalisman(name)
@@ -317,7 +328,24 @@ AssistanceTab:Button({
 	end,
 })
 
--- 6. Somnus
+-- 6. Immobilus
+AssistanceTab:Button({
+	Text = "Immobilus",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Immobilus = Events and Events:FindFirstChild("Immobilus")
+		local FireSpell = Immobilus and Immobilus:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Immobilus", Content = "Immobilus.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Immobilus", Content = "Immobilus fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 7. Somnus
 AssistanceTab:Button({
 	Text = "Somnus",
 	Icon = "flame",
@@ -334,7 +362,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 7. Delfan
+-- 8. Delfan
 AssistanceTab:Button({
 	Text = "Delfan",
 	Icon = "flame",
@@ -351,7 +379,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 8. Resist Spell
+-- 9. Resist Spell
 AssistanceTab:Button({
 	Text = "Resist Spell",
 	Icon = "flame",
@@ -368,7 +396,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 9. Heart Stopping
+-- 10. Heart Stopping
 AssistanceTab:Button({
 	Text = "Heart Stopping",
 	Icon = "flame",
@@ -385,7 +413,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 10. Astral Projection
+-- 11. Astral Projection
 AssistanceTab:Button({
 	Text = "Astral Projection",
 	Icon = "flame",
@@ -402,7 +430,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 11. Preservation
+-- 12. Preservation
 AssistanceTab:Button({
 	Text = "Preservation",
 	Icon = "flame",
@@ -419,7 +447,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 12. Resurrection
+-- 13. Resurrection
 AssistanceTab:Button({
 	Text = "Resurrection",
 	Icon = "flame",
@@ -443,7 +471,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 13. Linking
+-- 14. Linking
 AssistanceTab:Button({
 	Text = "Linking",
 	Icon = "flame",
@@ -460,7 +488,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 14. UnLinking
+-- 15. UnLinking
 AssistanceTab:Button({
 	Text = "UnLinking",
 	Icon = "flame",
@@ -477,7 +505,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 15. EndChannel
+-- 16. EndChannel
 AssistanceTab:Button({
 	Text = "EndChannel",
 	Icon = "flame",
@@ -494,7 +522,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 16. Merge
+-- 17. Merge
 AssistanceTab:Button({
 	Text = "Merge",
 	Icon = "flame",
@@ -511,7 +539,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 17. Veil Lifting
+-- 18. Veil Lifting
 AssistanceTab:Button({
 	Text = "Veil Lifting",
 	Icon = "flame",
@@ -528,7 +556,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 18. Surgere
+-- 19. Surgere
 AssistanceTab:Button({
 	Text = "Surgere",
 	Icon = "flame",
@@ -545,7 +573,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 19. Ring Spell
+-- 20. Ring Spell
 AssistanceTab:Button({
 	Text = "Ring Spell",
 	Icon = "flame",
@@ -562,7 +590,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 20. Ring Disabling
+-- 21. Ring Disabling
 AssistanceTab:Button({
 	Text = "Ring Disabling",
 	Icon = "flame",
@@ -579,7 +607,7 @@ AssistanceTab:Button({
 	end,
 })
 
--- 21. Suctus Incendia
+-- 22. Suctus Incendia
 AssistanceTab:Button({
 	Text = "Suctus Incendia",
 	Icon = "flame",
@@ -747,10 +775,8 @@ AssistanceTab:BoldLabel({ Text = "NPC Teleport" })
 
 local function getNPCNames()
 	local names = {
-		-- Pinned at top
 		"Landon",
 		"Bastianna",
-		-- Everyone else, alphabetical
 		"Abby", "Alissa", "April", "Arthur", "Caterina", "Damon", "Emilia",
 		"Enzo", "Jane", "Kelly Beach", "Kyle", "Lana", "Marcel", "Marlon",
 		"Monique", "Morana", "Sandra", "Sarah", "Sophie", "Steve", "Tabatha",
