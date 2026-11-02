@@ -454,19 +454,12 @@ AssistanceTab:Button({
 	Callback = function()
 		local Events = ReplicatedStorage:FindFirstChild("Events")
 		local Resurrection = Events and Events:FindFirstChild("Resurrection")
-		if not Resurrection then
-			Menu:Notify({ Title = "Resurrection", Content = "Resurrection event not found.", Type = "Error", Duration = 3 })
+		local FireSpell = Resurrection and Resurrection:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Resurrection", Content = "Resurrection.FireSpell event not found.", Type = "Error", Duration = 3 })
 			return
 		end
-		local map = workspace:FindFirstChild("Map")
-		local m2 = map and map:FindFirstChild("Model2")
-		local m3 = m2 and m2:FindFirstChild("Model3")
-		local cube = m3 and m3:FindFirstChild("Cube")
-		if not cube then
-			Menu:Notify({ Title = "Resurrection", Content = "Resurrection target (Map.Model2.Model3.Cube) not found.", Type = "Error", Duration = 3 })
-			return
-		end
-		Resurrection:FireServer(cube)
+		FireSpell:FireServer("Regular")
 		Menu:Notify({ Title = "Resurrection", Content = "Resurrection fired.", Type = "Success", Duration = 2 })
 	end,
 })
@@ -607,7 +600,58 @@ AssistanceTab:Button({
 	end,
 })
 
--- 22. Suctus Incendia
+-- 22. Tomb
+AssistanceTab:Button({
+	Text = "Tomb",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local Tomb = Events and Events:FindFirstChild("Tomb")
+		local FireSpell = Tomb and Tomb:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Tomb", Content = "Tomb.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Tomb", Content = "Tomb fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 23. Tomb Closing
+AssistanceTab:Button({
+	Text = "Tomb Closing",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local TombeClosing = Events and Events:FindFirstChild("TombeClosing")
+		local FireSpell = TombeClosing and TombeClosing:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Tomb Closing", Content = "TombeClosing.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Tomb Closing", Content = "Tomb Closing fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 24. Original Bind
+AssistanceTab:Button({
+	Text = "Original Bind",
+	Icon = "flame",
+	Callback = function()
+		local Events = ReplicatedStorage:FindFirstChild("Events")
+		local OriginalBind = Events and Events:FindFirstChild("OriginalBind")
+		local FireSpell = OriginalBind and OriginalBind:FindFirstChild("FireSpell")
+		if not FireSpell then
+			Menu:Notify({ Title = "Original Bind", Content = "OriginalBind.FireSpell event not found.", Type = "Error", Duration = 3 })
+			return
+		end
+		FireSpell:FireServer("Regular")
+		Menu:Notify({ Title = "Original Bind", Content = "Original Bind fired.", Type = "Success", Duration = 2 })
+	end,
+})
+
+-- 25. Suctus Incendia
 AssistanceTab:Button({
 	Text = "Suctus Incendia",
 	Icon = "flame",
